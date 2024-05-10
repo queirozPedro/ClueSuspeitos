@@ -44,6 +44,18 @@ public class Player {
         return string;
     }
 
+    public ArrayList<Carta> verificarResposta(ArrayList<Carta> perguntas){
+        ArrayList<Carta> respostas = new ArrayList<>();
+        for(int i = 0; i < getPistas().size(); i++){
+            for (int j = 0; j < respostas.size(); j++){
+                if (perguntas.get(j) == getPista(i)){
+                    respostas.add(getPista(i));
+                }
+            }
+        }
+        return respostas;
+    }
+
     public void marcarNoDeck(){
         for (int i = 0; i < deckArquivo.getDeck().size(); i++){
             for (int j = 0; j < pistas.size(); j++){
