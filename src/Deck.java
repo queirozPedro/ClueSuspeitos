@@ -27,16 +27,25 @@ public class Deck {
         cartas.add(new Carta("Suspeito", "Mustard"));
     }
 
-    public ArrayList<Carta> getCartas() {
+    public ArrayList<Carta> getDeck() {
         return cartas;
     }
-    public void setCartas(ArrayList<Carta> cartas) {
+    public void setDeck(ArrayList<Carta> cartas) {
         this.cartas = cartas;
     }
+    
+    
+    public Carta getCarta(int i){
+        return cartas.get(i);
+    } 
 
     public void marcarCarta(int i){
         cartas.get(i).marcarCarta();
     }
+    public void desmarcarCarta(int i){
+        cartas.get(i).desmarcarCarta();
+    }
+
     public boolean cartaIsMarcada(int i){
         return cartas.get(i).isMarcada();
     }
@@ -48,8 +57,13 @@ public class Deck {
         return cartas.get(i).isCrime();
     }
 
-    public Carta getCarta(int i){
-        return cartas.get(i);
-    } 
+    public String exibirDeck(){
+        String string = "\n = Deck do Jogador =";
+        for(int i = 0; i < getDeck().size(); i++){
+            string += "\n " + (i+1) + " -" + getCarta(i).exibirCarta();
+        }
+        return string;
+    }
+
 
 }

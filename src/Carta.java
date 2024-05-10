@@ -19,6 +19,9 @@ public class Carta {
     public void marcarCarta() {
         this.marcada = true;
     }
+    public void desmarcarCarta() {
+        this.marcada = false;
+    }
 
     public boolean isCrime() {
         return crime;
@@ -28,12 +31,26 @@ public class Carta {
     }
 
     public String exibirCarta() {
-        return "Carta [classe=" + classe + ", nome=" + nome + ", marcada=" + marcada + "]";
+        if (isCrime()){
+            return GameManager.colorirTexto(" Classe: " + classe + ", Nome: " + nome, GameManager.corLaranja);
+        }
+        else if (isMarcada()){
+            return GameManager.colorirTexto(" Classe: " + classe + ", Nome: " + nome, GameManager.corAmarelo);
+        }
+        else{
+            return " Classe: " + classe + ", Nome: " + nome;
+        }
     }
 
-    @Override
-    public String toString() {
-        return "Carta [classe=" + classe + ", nome=" + nome + ", crime=" + crime + ", marcada=" + marcada + "]";
+    public String getClasse() {
+        return classe;
     }
-    
+
+    public void setClasse(String classe) {
+        this.classe = classe;
+    }
+
+    public String exibirCartaDetalhada() {
+        return " Carta [classe=" + classe + ", nome=" + nome + ", crime=" + crime + ", marcada=" + marcada + "]";
+    }
 }

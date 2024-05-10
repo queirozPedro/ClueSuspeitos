@@ -16,7 +16,6 @@ public class Player {
     public void setDeckArquivo(Deck deckArquivo) {
         this.deckArquivo = deckArquivo;
     }
-
     
     public ArrayList<Carta> getPistas() {
         return pistas;
@@ -27,6 +26,32 @@ public class Player {
     
     public Carta getPista(int i){
         return pistas.get(i);
+    }
+
+    public String exibirMao(){
+        String string = deckArquivo.exibirDeck() + "\n\n = Pistas do Jogador =";
+        for(int i = 0; i < pistas.size(); i++){
+            string += "\n" + pistas.get(i).exibirCarta();
+        }
+        return string;
+    }
+
+    public String exibirPistas(){
+        String string ="\n = Pistas do Jogador =";
+        for(int i = 0; i < pistas.size(); i++){
+            string += "\n" + pistas.get(i).exibirCarta();
+        }
+        return string;
+    }
+
+    public void marcarNoDeck(){
+        for (int i = 0; i < deckArquivo.getDeck().size(); i++){
+            for (int j = 0; j < pistas.size(); j++){
+                if(pistas.get(j) == deckArquivo.getCarta(i)){
+                    deckArquivo.getCarta(i).marcarCarta();
+                }
+            }
+        }
     }
 
 }
