@@ -4,6 +4,7 @@ import java.util.ArrayList;
 public class Player {
     private Deck deckArquivo;
     private ArrayList<Carta> pistas;
+    private int[] acusacao;
 
     public Player(ArrayList<Carta> pistas) {
         this.deckArquivo = new Deck();
@@ -28,9 +29,10 @@ public class Player {
         return pistas.get(i);
     }
 
+
     public String exibirMao(){
         String string = deckArquivo.exibirDeck() + "\n\n = Pistas do Jogador =";
-        for(int i = 0; i < pistas.size(); i++){
+        for(int i = 0; i < pistas.size(); i++){ 
             string += "\n" + pistas.get(i).exibirCarta();
         }
         return string;
@@ -46,11 +48,10 @@ public class Player {
 
     public ArrayList<Carta> verificarResposta(ArrayList<Carta> perguntas){
         ArrayList<Carta> respostas = new ArrayList<>();
-        for(int i = 0; i < getPistas().size(); i++){
-            for (int j = 0; j < respostas.size(); j++){
-                if (perguntas.get(j) == getPista(i)){
-                    respostas.add(getPista(i));
-                }
+        for (int i = 0; i < pistas.size(); i++){
+            for (int j = 0; j < perguntas.size(); j++){
+                if(pistas.get(i).getNome().equals(perguntas.get(j).getNome()))
+                    respostas.add(perguntas.get(j));
             }
         }
         return respostas;
@@ -64,6 +65,14 @@ public class Player {
                 }
             }
         }
+    }
+
+    public int getAcusacao(int i) {
+        return acusacao[i];
+    }
+
+    public void setAcusacao(int[] acusacao) {
+        this.acusacao = acusacao;
     }
 
 }

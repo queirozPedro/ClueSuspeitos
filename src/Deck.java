@@ -58,9 +58,9 @@ public class Deck {
     }
 
     public String exibirDeck(){
-        String string = "\n = Deck do Jogador =";
+        String string = "\n = Deck =";
         for(int i = 0; i < getDeck().size(); i++){
-            string += "\n " + (i+1) + " -" + getCarta(i).exibirCarta();
+            string += (i == 4 || i % 9 == 0)? "\n\n " + (i+1) + " -" + getCarta(i).exibirCarta(): "\n " + (i+1) + " -" + getCarta(i).exibirCarta();
         }
         return string;
     }

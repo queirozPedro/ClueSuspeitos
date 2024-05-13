@@ -49,6 +49,10 @@ public class Carta {
     public void setClasse(String classe) {
         this.classe = classe;
     }
+    
+    public String getNome() {
+        return nome;
+    }
 
     public String exibirCartaDetalhada() {
         return " Carta [classe=" + classe + ", nome=" + nome + ", crime=" + crime + ", marcada=" + marcada + "]";
