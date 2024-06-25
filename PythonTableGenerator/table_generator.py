@@ -1,26 +1,27 @@
 import numpy as np
 
 '''
+    Geração de jogos em tabelas para estudo do Jogo Clue
     Para representar as 15 cartas do jogo, serão usados os números de 1 a 15, 
     onde cada um representa, respectivamente:
     
-    1 -| Castiçal
-    2 -| Corda
-    3 -| Faca
-    4 -| Revólver
+    1 -> Castiçal
+    2 -> Corda
+    3 -> Faca
+    4 -> Revólver
 
-    5 -| Cozinha
-    6 -| Hall
-    7 -| Sala de Estar
-    8 -| Sala de Jantar
-    9 -| Spa
+    5 -> Cozinha
+    6 -> Hall
+    7 -> Sala de Estar
+    8 -> Sala de Jantar
+    9 -> Spa
 
-    10 -| Green
-    11 -| Mustard
-    12 -| Peacock
-    13 -| Plum
-    14 -| Scarlet
-    15 -| White
+    10 -> Green
+    11 -> Mustard
+    12 -> Peacock
+    13 -> Plum
+    14 -> Scarlet
+    15 -> White
 '''
 
 def gerar_crime():
@@ -141,11 +142,14 @@ def corromper_tabela(tabela, chance1, chance_menos1):
     return tabela;
 
 def gerar_tabelas_txt():
-    print("Caracteristicas do Arquivo")
+    
+    print("Caracteristicas do Arquivo Txt")
+    
     quant_tabelas = int(input("Quantidade de Tabelas: "))
     chance1 = int(input("Probabilidade de 1 ser corrompido(0 a 100): "))
     chance_menos1 = int(input("Probabilidade de -1 ser corrompido(0 a 100): "))
     nome_arquivo = f'{quant_tabelas}_jogos_com_{chance1}%_para_1_e_{chance_menos1}%_para_-1.txt'
+    
     with open(nome_arquivo, 'w') as arquivo:
         for i in range(quant_tabelas):
 
@@ -172,8 +176,64 @@ def gerar_tabelas_txt():
             arquivo.writelines(linhas)
     print("Arquivo Gerado com Sucesso")
 
-def main():   
-    gerar_tabelas_txt()
+def gerar_tabelas_tex():
+    print("Caracteristicas do Arquivo LaTex")
+    
+    quant_tabelas = int(input("Quantidade de Tabelas: "))
+    chance1 = int(input("Probabilidade de 1 ser corrompido(0 a 100): "))
+    chance_menos1 = int(input("Probabilidade de -1 ser corrompido(0 a 100): "))
+    nome_arquivo = f'{quant_tabelas}_jogos_com_{chance1}%_para_1_e_{chance_menos1}%_para_-1.tex'
+
+    with open(nome_arquivo, 'w') as arquivo:
+        
+        texto = [
+            r'\documentclass{article}',
+            r'\usepackage{graphicx} % Required for inserting images',
+            r'\usepackage[portuguese]{babel}',
+            r'\usepackage[utf8]{inputenc}',
+            r'\usepackage[T1]{fontenc}',
+            r'\begin{document}'
+        ]
+
+        for n in range(quant_tabelas):
+            crime = gerar_crime()
+            evidencias = gerar_evidencias(crime)
+            jogadores = gerar_jogadores(evidencias)
+            tabela = corromper_tabela(gerar_tabela(jogadores), chance1, chance_menos1)
+
+            cartas = [
+                "01 - Castical", "02 - Corda", "03 - Faca", "04 - Revolver",
+                "05 - Cozinha", "06 - Hall", "07 - Sala de Estar", "08 - Sala de Jantar",
+                "09 - Spa", "10 - Green", "11 - Mustard", "12 - Peacock",
+                "13 - Plum", "14 - Scarlet", "15 - White"
+            ]
+
+            texto.extend([
+                r'\begin{table}[!htb]',
+                r'\begin{tabular}{|l|l|l|l|l|}',
+                r'\hline',
+                r'Cartas & Jogador 0 & Jogador 1 & Jogador 2 & Jogador 3 \\ \hline'
+            ])
+
+            for i in range(15):
+                linha = cartas[i]
+                for j in range(4):
+                    linha += f' & {tabela[j][i]}'
+                linha += r' \\ \hline'
+                texto.append(linha)
+
+            texto.extend([
+                r'\end{tabular}',
+                r'\end{table}'
+            ])
+
+        texto.append(r'\end{document}')
+
+        arquivo.writelines('\n'.join(texto))
+
+def main(): 
+    # gerar_tabelas_txt()  
+    gerar_tabelas_tex()
 
 if __name__ == "__main__":
     main()
