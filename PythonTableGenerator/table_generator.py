@@ -1,7 +1,7 @@
 import numpy as np
 
 '''
-    Geração de jogos em tabelas para estudo do Jogo Clue
+    Geração de jogos em tabelas para estudo do Jogo Clue Card
     Para representar as 15 cartas do jogo, serão usados os números de 1 a 15, 
     onde cada um representa, respectivamente:
     
@@ -24,12 +24,14 @@ import numpy as np
     15 -> White
 '''
 
+
 def gerar_crime():
     arma = np.random.randint(1, 5)
     lugar = np.random.randint(5, 10)
     suspeito = np.random.randint(10, 16)
     crime = np.array([arma, lugar, suspeito])
     return crime
+
 
 def gerar_evidencias(crime):
     # Cria um array de números de 1 a 15
@@ -41,94 +43,60 @@ def gerar_evidencias(crime):
     evidencias = pistas[mascara]
     return evidencias
 
+
 def gerar_jogadores(evidencias):
-    jogador0 = np.random.choice(evidencias, size=3, replace=False)
-    evidencias = evidencias[~np.isin(evidencias, jogador0)]
-    
-    jogador1 = np.random.choice(evidencias, size=3, replace=False)
-    evidencias = evidencias[~np.isin(evidencias, jogador1)]
-    
-    jogador2 = np.random.choice(evidencias, size=3, replace=False)
-    evidencias = evidencias[~np.isin(evidencias, jogador2)]
 
-    jogador3 = np.random.choice(evidencias, size=3, replace=False)
-    evidencias = evidencias[~np.isin(evidencias, jogador3)]
-    
-    jogador0.sort()
-    jogador1.sort()
-    jogador2.sort()
-    jogador3.sort()
+    jogadores = []
 
-    jogadores = np.array([jogador0, jogador1, jogador2, jogador3]) 
-    
+    for i in range(4):
+        jogador = np.random.choice(evidencias, size=3, replace=False)
+        evidencias = evidencias[~np.isin(evidencias, jogador)]
+        jogador.sort()
+        jogadores.append(jogador)
+
+    jogadores = np.array(jogadores)
+
     return jogadores
 
+
 def gerar_tabela(jogadores):
-    tabela_jogador0 = np.arange(1, 16)
-    mascara = np.isin(tabela_jogador0, jogadores[0])
-    tabela_jogador0[mascara] = 1  
-    tabela_jogador0[~mascara] = -1  
+    tabela_aux = []
 
-    tabela_jogador1 = np.arange(1, 16)
-    mascara = np.isin(tabela_jogador1, jogadores[1])
-    tabela_jogador1[mascara] = 1  
-    tabela_jogador1[~mascara] = -1  
+    for i in range(4):
+        tabela_jogador_np = np.arange(1, 16)
+        mascara = np.isin(tabela_jogador_np, jogadores[i])
+        tabela_jogador_np[mascara] = 1
+        tabela_jogador_np[~mascara] = -1
+        tabela_jogador = tabela_jogador_np.tolist()
+        tabela_aux.append(tabela_jogador)
 
-    tabela_jogador2 = np.arange(1, 16)
-    mascara = np.isin(tabela_jogador2, jogadores[2])
-    tabela_jogador2[mascara] = 1  
-    tabela_jogador2[~mascara] = -1  
-    
-    tabela_jogador3 = np.arange(1, 16)
-    mascara = np.isin(tabela_jogador3, jogadores[3])
-    tabela_jogador3[mascara] = 1  
-    tabela_jogador3[~mascara] = -1  
-    
-    tabela = np.array([tabela_jogador0, tabela_jogador1, tabela_jogador2, tabela_jogador3])
+    tabela = np.array(tabela_aux)
 
     return tabela
 
+
 def gerar_string_tabela(tabela):
+
+    cartas = [
+        "01 - Castical       ", "02 - Corda          ", "03 - Faca           ", "04 - Revolver       ",
+        "05 - Cozinha        ", "06 - Hall           ", "07 - Sala de Estar  ", "08 - Sala de Jantar ",
+        "09 - Spa            ", "10 - Green          ", "11 - Mustard        ", "12 - Peacock        ",
+        "13 - Plum           ", "14 - Scarlet        ", "15 - White          "
+    ]
+
     string = ''
+
     for i in range(15):
-        if i == 0:
-            string += f'Castical({i+1})         | '
-        elif i == 1:
-            string += f'Corda({i+1})            | '
-        elif i == 2:
-            string += f'Faca({i+1})             | '
-        elif i == 3:
-            string += f'Revolver({i+1})         | '
-        elif i == 4:
-            string += f'Cozinha({i+1})          | '
-        elif i == 5:
-            string += f'Hall({i+1})             | '
-        elif i == 6:
-            string += f'Sala de Estar({i+1})    | '
-        elif i == 7:
-            string += f'Sala de Jantar({i+1})   | '
-        elif i == 8:
-            string += f'Spa({i+1})              | '
-        elif i == 9:
-            string += f'Green({i+1})           | '
-        elif i == 10:
-            string += f'Mustard({i+1})         | '
-        elif i == 11:
-            string += f'Peacock({i+1})         | '
-        elif i == 12:
-            string += f'Plum({i+1})            | '
-        elif i == 13:
-            string += f'Scarlet({i+1})         | '
-        elif i == 14:
-            string += f'White({i+1})           | '
+        string += f'|{cartas[i] }|'
         for j in range(4):
             if tabela[j][i] == 1 or tabela[j][i] == 0:
-                string += ' '+ str(tabela[j][i])+ " | "
+                string += ' '+ str(tabela[j][i])+ " |"
             else:
-                string += str(tabela[j][i])+ " | "
+                string += str(tabela[j][i])+ " |"
                         
         string += '\n'
     return(string)
+
 
 def corromper_tabela(tabela, chance1, chance_menos1):
     for i in range(15):
@@ -141,6 +109,7 @@ def corromper_tabela(tabela, chance1, chance_menos1):
                     tabela[j][i] = 0
     return tabela;
 
+
 def gerar_tabelas_txt():
     
     print("Caracteristicas do Arquivo Txt")
@@ -149,7 +118,14 @@ def gerar_tabelas_txt():
     chance1 = int(input("Probabilidade de 1 ser corrompido(0 a 100): "))
     chance_menos1 = int(input("Probabilidade de -1 ser corrompido(0 a 100): "))
     nome_arquivo = f'{quant_tabelas}_jogos_com_{chance1}%_para_1_e_{chance_menos1}%_para_-1.txt'
-    
+
+    cartas = [
+        "Castical(01)", "Corda(02)", "Faca(03)", "Revolver(04)",
+        "Cozinha(05)", "Hall(06)", "Sala de Estar(07)", "Sala de Jantar(08)",
+        "Spa(09)", "Green(10)", "Mustard(11)", "Peacock(12)",
+        "Plum(13)", "Scarlet(14)", "White(15)"
+    ]
+
     with open(nome_arquivo, 'w') as arquivo:
         for i in range(quant_tabelas):
 
@@ -162,12 +138,11 @@ def gerar_tabelas_txt():
                 f'Jogo {i+1} de {quant_tabelas}\n',
                 f'{chance1}% de chance de corromper o 1\n',
                 f'{chance_menos1}% de chance de corromper o -1\n\n',
-                f'Crime: {crime}\n',
-                f'Cartas dos Jogadores\n',
-                f'  Jogador {0}: {jogadores[0]}\n',
-                f'  Jogador {1}: {jogadores[1]}\n',
-                f'  Jogador {2}: {jogadores[2]}\n',
-                f'  Jogador {3}: {jogadores[3]}\n\n',
+                f'Crime: {cartas[crime[0]-1]}, {cartas[crime[1]-1]}, {cartas[crime[2]-1]}\n',
+                f'Jogador 0: {cartas[jogadores[0][0]-1]}, {cartas[jogadores[0][1]-1]}, {cartas[jogadores[0][2]-1]}\n',
+                f'Jogador 1: {cartas[jogadores[1][0]-1]}, {cartas[jogadores[1][1]-1]}, {cartas[jogadores[1][2]-1]}\n',
+                f'Jogador 2: {cartas[jogadores[2][0]-1]}, {cartas[jogadores[2][1]-1]}, {cartas[jogadores[2][2]-1]}\n',
+                f'Jogador 3: {cartas[jogadores[3][0]-1]}, {cartas[jogadores[3][1]-1]}, {cartas[jogadores[3][2]-1]}\n\n',
                 f'Tabela Corrompida \n',
                 gerar_string_tabela(tabela),
                 '\n\n\n'
@@ -175,6 +150,7 @@ def gerar_tabelas_txt():
 
             arquivo.writelines(linhas)
     print("Arquivo Gerado com Sucesso")
+
 
 def gerar_tabelas_tex():
     print("Caracteristicas do Arquivo LaTex")
@@ -192,7 +168,8 @@ def gerar_tabelas_tex():
             r'\usepackage[portuguese]{babel}',
             r'\usepackage[utf8]{inputenc}',
             r'\usepackage[T1]{fontenc}',
-            r'\begin{document}'
+            r'\begin{document}',
+            r'\title{Teste de Corrupção de Dados}'
         ]
 
         for n in range(quant_tabelas):
@@ -207,6 +184,10 @@ def gerar_tabelas_tex():
                 "09 - Spa", "10 - Green", "11 - Mustard", "12 - Peacock",
                 "13 - Plum", "14 - Scarlet", "15 - White"
             ]
+
+            linha = r'\section{Jogo '+ str(n+1)+ ' de ' + str(quant_tabelas) +'}'
+
+            texto.append(linha)
 
             texto.extend([
                 r'\begin{table}[!htb]',
@@ -224,12 +205,14 @@ def gerar_tabelas_tex():
 
             texto.extend([
                 r'\end{tabular}',
-                r'\end{table}'
+                r'\end{table}',
+                '\\ \\'
             ])
 
         texto.append(r'\end{document}')
 
         arquivo.writelines('\n'.join(texto))
+
 
 def main(): 
     # gerar_tabelas_txt()  
