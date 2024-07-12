@@ -1,3 +1,4 @@
+from sklearn.neural_network import MLPClassifier
 import numpy as np
 
 '''
@@ -97,6 +98,28 @@ def gerar_string_tabela(tabela):
         string += '\n'
     return(string)
 
+def gerar_string_tabela_detalhada(tabela, chance1, chance_menos1, crime):
+
+    cartas = [
+        "01 - Castical       ", "02 - Corda          ", "03 - Faca           ", "04 - Revolver       ",
+        "05 - Cozinha        ", "06 - Hall           ", "07 - Sala de Estar  ", "08 - Sala de Jantar ",
+        "09 - Spa            ", "10 - Green          ", "11 - Mustard        ", "12 - Peacock        ",
+        "13 - Plum           ", "14 - Scarlet        ", "15 - White          "
+    ]
+
+    string = f'\nCrime: {crime}\nChance de corromper o  1: {chance1}\nChance de corromper o -1: {chance_menos1}\n\n'
+
+    for i in range(15):
+        string += f'|{cartas[i] }|'
+        for j in range(4):
+            if tabela[j][i] == 1 or tabela[j][i] == 0:
+                string += ' '+ str(tabela[j][i])+ " |"
+            else:
+                string += str(tabela[j][i])+ " |"
+                        
+        string += '\n'
+    return(string)
+
 
 def corromper_tabela(tabela, chance1, chance_menos1):
     for i in range(15):
@@ -169,7 +192,7 @@ def gerar_tabelas_tex():
             r'\usepackage[utf8]{inputenc}',
             r'\usepackage[T1]{fontenc}',
             r'\begin{document}',
-            r'\title{Teste de Corrupção de Dados}'
+            r'\title{Teste de Corrupcao de Dados}'
         ]
 
         for n in range(quant_tabelas):
@@ -214,9 +237,151 @@ def gerar_tabelas_tex():
         arquivo.writelines('\n'.join(texto))
 
 
+def gerar_visualisacao():
+    crime = gerar_crime()
+    evidencias = gerar_evidencias(crime)
+    jogadores = gerar_jogadores(evidencias)
+    tabela = gerar_tabela(jogadores)
+    
+    linhas = [
+        f'Caracteristicas do Jogo'
+        f'Crime: {crime}\n'
+        f'Evidencias: {evidencias}\n'
+        f'Jogadores:\n{jogadores}\n\n'
+    ]
+
+    tabela_arma = []
+    for i in range(4):
+        for j in range(4):
+            tabela_arma.append(tabela[i][j])
+
+    tabela_lugar = []
+    for i in range(4):
+        for j in range(4,9):
+            tabela_lugar.append(tabela[i][j])
+
+    tabela_suspeito = []
+    for i in range(4):
+        for j in range(9,15):
+            tabela_suspeito.append(tabela[i][j])
+
+    with open ('arquivo.txt', 'w') as arquivo:
+        linhas.extend([
+            f'Tabela\n{tabela}\nTamanho: {len(tabela)} por {len(tabela[0])}\n\n',
+            f'Tabela Arma\n{tabela_arma}\nTamanho: {len(tabela_arma)}\n\n',
+            f'Tabela Lugar\n{tabela_lugar}\nTamanho: {len(tabela_lugar)}\n\n'
+            f'Tabela Suspeito\n{tabela_suspeito}\nTamanho: {len(tabela_suspeito)}\n\n'
+        ])
+        arquivo.writelines(linhas)
+
+def gerar_treino_teste():
+    crime = gerar_crime()
+    evidencias = gerar_evidencias(crime)
+    jogadores = gerar_jogadores(evidencias)
+    tabela = gerar_tabela(jogadores)
+
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+    
+    tabela_arma = []
+    tabela_lugar = []
+    tabela_suspeito = []
+
+    for i in range(4):
+        for j in range(4):
+            tabela_arma.append(tabela[i][j])
+    X = []
+    X.append(tabela_arma)
+    y = []
+    y.append(crime[0])
+    clf.fit(X, y)
+    A = (clf.predict([[-1, -1, -1, -1, 1, 1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1]]))
+
+    for i in range(4):
+        for j in range(4,9):
+            tabela_lugar.append(tabela[i][j])
+    X = []
+    X.append(tabela_lugar)
+    y = []
+    y.append(crime[1])
+    clf.fit(X, y)
+    B = (clf.predict([[-1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1]]))
+
+    for i in range(4):
+        for j in range(9,15):
+            tabela_suspeito.append(tabela[i][j])
+    X = []
+    X.append(tabela_suspeito)
+    y = []
+    y.append(crime[2])
+    clf.fit(X, y)
+    C = (clf.predict([[-1, -1, 1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1]]))
+
+    print(f'Teste Manual: {A}{B}{C}')
+
+
+def gerar_treino_auto():
+    quant = 15
+    chance1 = 0
+    chance_menos1 = 0
+
+    tabela_arma_X = []
+    crime_arma_y = []
+
+    tabela_lugar_X = []
+    crime_lugar_y = []
+
+    tabela_suspeito_X = []
+    crime_suspeito_y = []
+    
+    for n in range(quant):
+        crime = gerar_crime()
+        evidencias = gerar_evidencias(crime)
+        jogadores = gerar_jogadores(evidencias)
+        tabela_corrompida = corromper_tabela(gerar_tabela(jogadores), chance1, chance_menos1)
+    
+        crime_arma_y.append(crime[0])
+        crime_lugar_y.append(crime[1])
+        crime_suspeito_y.append(crime[2])
+
+        tabela_aux = []
+        for i in range(4):
+            for j in range(4):
+                tabela_aux.append(tabela_corrompida[i][j])
+        tabela_arma_X.append(tabela_aux)
+
+        tabela_aux = []
+        for i in range(4):
+            for j in range(4,9):
+                tabela_aux.append(tabela_corrompida[i][j])
+        tabela_lugar_X.append(tabela_aux)
+
+        tabela_aux = []
+        for i in range(4):
+            for j in range(9,15):
+                tabela_aux.append(tabela_corrompida[i][j])
+        tabela_suspeito_X.append(tabela_aux)
+
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15,15), random_state=1)
+
+    # print(f'{tabela_arma_X}\n')
+    # print(f'{crime_arma_y}\n\n')
+    # print(f'{tabela_lugar_X}\n')
+    # print(f'{crime_lugar_y}\n\n')
+    # print(f'{tabela_suspeito_X}\n')
+    # print(f'{crime_suspeito_y}\n\n')
+
+    clf.fit(tabela_arma_X, crime_arma_y)
+    A = (clf.predict([[-1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, 1, -1, -1, 1]]))
+    clf.fit(tabela_lugar_X, crime_lugar_y)
+    B = (clf.predict([[-1, 1, -1, -1, 1, -1, -1, -1, 1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1]]))
+    clf.fit(tabela_suspeito_X, crime_suspeito_y)
+    C = (clf.predict([[-1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, 1, -1, -1, 1, -1, -1, -1]]))
+
+    print(f'Teste Auto: {A}{B}{C}')
+
 def main(): 
-    # gerar_tabelas_txt()  
-    gerar_tabelas_tex()
+    gerar_treino_auto()
+
 
 if __name__ == "__main__":
     main()
