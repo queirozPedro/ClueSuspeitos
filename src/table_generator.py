@@ -237,7 +237,7 @@ def gerar_tabelas_tex():
         arquivo.writelines('\n'.join(texto))
 
 
-def gerar_visualisacao():
+def gerar_jogo_arquivo():
     crime = gerar_crime()
     evidencias = gerar_evidencias(crime)
     jogadores = gerar_jogadores(evidencias)
@@ -294,7 +294,7 @@ def gerar_treino_teste():
     y = []
     y.append(crime[0])
     clf.fit(X, y)
-    A = (clf.predict([[-1, -1, -1, -1, 1, 1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1]]))
+    a = (clf.predict([[-1, -1, -1, -1, 1, 1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1]]))
 
     for i in range(4):
         for j in range(4,9):
@@ -304,7 +304,7 @@ def gerar_treino_teste():
     y = []
     y.append(crime[1])
     clf.fit(X, y)
-    B = (clf.predict([[-1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1]]))
+    b = (clf.predict([[-1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1]]))
 
     for i in range(4):
         for j in range(9,15):
@@ -314,9 +314,9 @@ def gerar_treino_teste():
     y = []
     y.append(crime[2])
     clf.fit(X, y)
-    C = (clf.predict([[-1, -1, 1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1]]))
+    c = (clf.predict([[-1, -1, 1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1]]))
 
-    print(f'Teste Manual: {A}{B}{C}')
+    print(f'Teste Manual: {a}{b}{c}')
 
 
 def gerar_treino_auto():
@@ -363,24 +363,21 @@ def gerar_treino_auto():
 
     clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15,15), random_state=1)
 
-    # print(f'{tabela_arma_X}\n')
-    # print(f'{crime_arma_y}\n\n')
-    # print(f'{tabela_lugar_X}\n')
-    # print(f'{crime_lugar_y}\n\n')
-    # print(f'{tabela_suspeito_X}\n')
-    # print(f'{crime_suspeito_y}\n\n')
-
     clf.fit(tabela_arma_X, crime_arma_y)
-    A = (clf.predict([[-1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, 1, -1, -1, 1]]))
-    clf.fit(tabela_lugar_X, crime_lugar_y)
-    B = (clf.predict([[-1, 1, -1, -1, 1, -1, -1, -1, 1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1]]))
-    clf.fit(tabela_suspeito_X, crime_suspeito_y)
-    C = (clf.predict([[-1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, 1, -1, -1, 1, -1, -1, -1]]))
+    a = (clf.predict([[1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, -1, -1, -1, -1]]))
 
-    print(f'Teste Auto: {A}{B}{C}')
+    clf.fit(tabela_lugar_X, crime_lugar_y)
+    b = (clf.predict([[1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, 1]]))
+
+    clf.fit(tabela_suspeito_X, crime_suspeito_y)
+    c = (clf.predict([[-1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, -1, -1, 1, -1, -1, 1, 1, -1, -1, -1, -1]]))
+
+    print(f'\nTeste Auto: {a}{b}{c}\n')
 
 def main(): 
-    gerar_treino_auto()
+    # gerar_treino_auto()
+    # gerar_jogo_arquivo()
+    gerar_tabelas_txt()
 
 
 if __name__ == "__main__":
