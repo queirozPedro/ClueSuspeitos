@@ -27,6 +27,9 @@ import numpy as np
 
 
 def gerar_crime():
+    '''
+    Método que gera o crime.
+    '''
     arma = np.random.randint(1, 5)
     lugar = np.random.randint(5, 10)
     suspeito = np.random.randint(10, 16)
@@ -46,7 +49,10 @@ def gerar_evidencias(crime):
 
 
 def gerar_jogadores(evidencias):
-
+    '''
+    Vai receber um array com as evidencias e distribuir elas entre os jogadores
+    Retorna uma matriz (array de array) de jogadorse 'jogadores[]' e suas cartas 'jogadores[][]'
+    '''
     jogadores = []
 
     for i in range(4):
@@ -73,8 +79,7 @@ def gerar_tabela(jogadores):
 
     tabela = np.array(tabela_aux)
 
-    return tabela
-
+    return tabela.tolist()
 
 def gerar_string_tabela(tabela):
 
@@ -122,6 +127,10 @@ def gerar_string_tabela_detalhada(tabela, chance1, chance_menos1, crime):
 
 
 def corromper_tabela(tabela, chance1, chance_menos1):
+    '''
+    Método que corrompe uma tabela. Recebe a tabela junto as chances de corromper o 
+    número 1 e o -1. Retorna a tabela corrompida. 
+    '''
     for i in range(15):
         for j in range(1,4):
             if tabela[j][i] == 1:
@@ -134,6 +143,9 @@ def corromper_tabela(tabela, chance1, chance_menos1):
 
 
 def gerar_tabelas_txt():
+    '''
+    Método que gera as tabelas em txt
+    '''
     
     print("Caracteristicas do Arquivo Txt")
     
@@ -176,6 +188,9 @@ def gerar_tabelas_txt():
 
 
 def gerar_tabelas_tex():
+    '''
+    Método que gera as tabelas em LaTex
+    '''
     print("Caracteristicas do Arquivo LaTex")
     
     quant_tabelas = int(input("Quantidade de Tabelas: "))
@@ -236,7 +251,6 @@ def gerar_tabelas_tex():
 
         arquivo.writelines('\n'.join(texto))
 
-
 def gerar_jogo_arquivo():
     crime = gerar_crime()
     evidencias = gerar_evidencias(crime)
@@ -269,115 +283,146 @@ def gerar_jogo_arquivo():
         linhas.extend([
             f'Tabela\n{tabela}\nTamanho: {len(tabela)} por {len(tabela[0])}\n\n',
             f'Tabela Arma\n{tabela_arma}\nTamanho: {len(tabela_arma)}\n\n',
-            f'Tabela Lugar\n{tabela_lugar}\nTamanho: {len(tabela_lugar)}\n\n'
+            f'Tabela Lugar\n{tabela_lugar}\nTamanho: {len(tabela_lugar)}\n\n',
             f'Tabela Suspeito\n{tabela_suspeito}\nTamanho: {len(tabela_suspeito)}\n\n'
         ])
-        arquivo.writelines(linhas)
+        arquivo.writelines(linhas) 
 
-def gerar_treino_teste():
+def criar_cenario(chance1, chance_menos1):
+    '''
+    O método criar_cenario, cria o cenario do crime e retorna o array do crime e a tabela já corrompida.
+    '''
     crime = gerar_crime()
-    evidencias = gerar_evidencias(crime)
-    jogadores = gerar_jogadores(evidencias)
-    tabela = gerar_tabela(jogadores)
+    return crime, corromper_tabela(gerar_tabela(gerar_jogadores(gerar_evidencias(crime))), chance1, chance_menos1)
 
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
-    
-    tabela_arma = []
-    tabela_lugar = []
-    tabela_suspeito = []
+def treinar():
+    print(f"\n\nCaracteristicas do Treino")
+    quant_treinos = int(input("Quantidade de Treinos: "))
+    quant_palpites = int(input("Quantidade de Palpites Automáticos: "))
+    print(f"Informações adicionais")
+    chance1 = int(input("Chance de Corromper o 1: "))
+    chance_menos1 = int(input("Chance de Corromper o -1: "))
 
-    for i in range(4):
-        for j in range(4):
-            tabela_arma.append(tabela[i][j])
-    X = []
-    X.append(tabela_arma)
-    y = []
-    y.append(crime[0])
-    clf.fit(X, y)
-    a = (clf.predict([[-1, -1, -1, -1, 1, 1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1]]))
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15), random_state=1)
 
-    for i in range(4):
-        for j in range(4,9):
-            tabela_lugar.append(tabela[i][j])
-    X = []
-    X.append(tabela_lugar)
-    y = []
-    y.append(crime[1])
-    clf.fit(X, y)
-    b = (clf.predict([[-1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1]]))
+    # Os itens nomeados com X serão as tabelas com 0, 1 e -1 referentes aos jogadores.
+    arma_X = []
+    lugar_X = []
+    suspeito_X = []
+    # Os itens nomeados com y serão as respostas dos crimes.
+    arma_y = []
+    lugar_y = []
+    suspeito_y = []
 
-    for i in range(4):
-        for j in range(9,15):
-            tabela_suspeito.append(tabela[i][j])
-    X = []
-    X.append(tabela_suspeito)
-    y = []
-    y.append(crime[2])
-    clf.fit(X, y)
-    c = (clf.predict([[-1, -1, 1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1]]))
+    # Treinamentos
+    for n in range(quant_treinos):
+        # Vou criar o crime e a tabela
+        crime, tabela = criar_cenario(chance1, chance_menos1)
+        # Distribuir o crime em seu respectivos y
+        arma_y.append(crime[0])
+        lugar_y.append(crime[1])
+        suspeito_y.append(crime[2])
 
-    print(f'Teste Manual: {a}{b}{c}')
-
-
-def gerar_treino_auto():
-    quant = 15
-    chance1 = 0
-    chance_menos1 = 0
-
-    tabela_arma_X = []
-    crime_arma_y = []
-
-    tabela_lugar_X = []
-    crime_lugar_y = []
-
-    tabela_suspeito_X = []
-    crime_suspeito_y = []
-    
-    for n in range(quant):
-        crime = gerar_crime()
-        evidencias = gerar_evidencias(crime)
-        jogadores = gerar_jogadores(evidencias)
-        tabela_corrompida = corromper_tabela(gerar_tabela(jogadores), chance1, chance_menos1)
-    
-        crime_arma_y.append(crime[0])
-        crime_lugar_y.append(crime[1])
-        crime_suspeito_y.append(crime[2])
-
+        # Divide um array para cada tipo de carta
+        # Um array com as informações de armas
         tabela_aux = []
         for i in range(4):
             for j in range(4):
-                tabela_aux.append(tabela_corrompida[i][j])
-        tabela_arma_X.append(tabela_aux)
-
+                tabela_aux.append(tabela[i][j])
+        arma_X.append(tabela_aux)
+        # Um array com as informações de lugares
         tabela_aux = []
         for i in range(4):
             for j in range(4,9):
-                tabela_aux.append(tabela_corrompida[i][j])
-        tabela_lugar_X.append(tabela_aux)
-
+                tabela_aux.append(tabela[i][j])
+        lugar_X.append(tabela_aux)
+        # Um array com as informações de suspeitos
         tabela_aux = []
         for i in range(4):
             for j in range(9,15):
-                tabela_aux.append(tabela_corrompida[i][j])
-        tabela_suspeito_X.append(tabela_aux)
+                tabela_aux.append(tabela[i][j])
+        suspeito_X.append(tabela_aux)
 
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15,15), random_state=1)
 
-    clf.fit(tabela_arma_X, crime_arma_y)
-    a = (clf.predict([[1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, -1, -1, -1, -1]]))
+    # Todas as possibilidades de acertos e erros
+    acertos = 0
+    acertos_arma = 0
+    acertos_lugar = 0
+    acertos_suspeito = 0
+    erros_totais = 0
+    acertos_arma_lugar = 0
+    acertos_arma_suspeito = 0
+    acertos_lugar_suspeito = 0
 
-    clf.fit(tabela_lugar_X, crime_lugar_y)
-    b = (clf.predict([[1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, 1]]))
+    for m in range(quant_palpites):
+        crime, tabela = criar_cenario(chance1, chance_menos1)
 
-    clf.fit(tabela_suspeito_X, crime_suspeito_y)
-    c = (clf.predict([[-1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, -1, -1, 1, -1, -1, 1, 1, -1, -1, -1, -1]]))
+        tabela_arma = []
+        for i in range(4):
+            for j in range(4):
+                tabela_arma.append(tabela[i][j])
 
-    print(f'\nTeste Auto: {a}{b}{c}\n')
+        tabela_lugar = []
+        for i in range(4):
+            for j in range(4,9):
+                tabela_lugar.append(tabela[i][j])
+
+        tabela_suspeito = []
+        for i in range(4):
+            for j in range(9,15):
+                tabela_suspeito.append(tabela[i][j])
+
+        clf.fit(arma_X, arma_y)
+        palpite_arma = (clf.predict([tabela_arma]))
+
+        clf.fit(lugar_X, lugar_y)
+        palpite_lugar = (clf.predict([tabela_lugar]))
+
+        clf.fit(suspeito_X, suspeito_y)
+        palpite_suspeito = (clf.predict([tabela_suspeito]))
+
+        if crime[0] == palpite_arma: # Arma
+            if crime[1] == palpite_lugar: # Arma e Lugar
+                if crime[2] == palpite_suspeito: # Arma, lugar e suspeito
+                    acertos += 1
+                else:
+                    acertos_arma_lugar += 1
+            elif crime[2] == palpite_suspeito: # Arma e suspeito
+                acertos_arma_suspeito += 1
+            else:
+                acertos_arma += 1
+        elif crime[1] == palpite_lugar: # Lugar
+            if crime[2] == palpite_suspeito: # Lugar e suspeito
+                acertos_lugar_suspeito += 1
+            else:
+                acertos_lugar += 1
+        elif crime[2] == palpite_suspeito: # Suspeito
+            acertos_suspeito += 1
+        else:
+            erros_totais += 1
+
+    string = [
+        f"\n\nPara um total de {quant_treinos} treinos\n",
+        f"Para um total de {quant_palpites} palpites\n",
+        f"Com chance de {chance1}% de Corromper o 1\n",
+        f"Com chance de {chance_menos1}% de Corromer o -1\n",
+        f"\nAconteceram\n",
+        f"Acertos completos: {acertos}\n",
+        f"Acertos de Arma e Lugar: {acertos_arma_lugar}\n",
+        f"Acertos de Arma e Suspeito: {acertos_arma_suspeito}\n",
+        f"Acertos de Lugar e Suspeito: {acertos_lugar_suspeito}\n",
+        f"Acertos apenas de Arma: {acertos_arma}\n",
+        f"Acertos apenas de Lugar: {acertos_lugar}\n",
+        f"Acertos apenas de Suspeito: {acertos_suspeito}\n",
+        f"Erros completos: {erros_totais}\n"
+    ]
+
+    print("".join(string))
+                
 
 def main(): 
-    # gerar_treino_auto()
+    treinar()
     # gerar_jogo_arquivo()
-    gerar_tabelas_txt()
 
 
 if __name__ == "__main__":
