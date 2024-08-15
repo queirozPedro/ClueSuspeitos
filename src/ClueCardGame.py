@@ -304,6 +304,8 @@ def treinar():
     chance_menos1 = int(input("Chance de Corromper o -1: "))
 
     clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15), random_state=1)
+    clf1 = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15), random_state=1)
+    clf2 = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15), random_state=1)
 
     # Os itens nomeados com X serão as tabelas com 0, 1 e -1 referentes aos jogadores.
     arma_X = []
@@ -343,6 +345,10 @@ def treinar():
                 tabela_aux.append(tabela[i][j])
         suspeito_X.append(tabela_aux)
 
+    # 'Cria' ou 'faz' os treinos
+    clf.fit(arma_X, arma_y)
+    clf1.fit(lugar_X, lugar_y)
+    clf2.fit(suspeito_X, suspeito_y)
 
     # Todas as possibilidades de acertos e erros
     acertos = 0
@@ -372,14 +378,9 @@ def treinar():
             for j in range(9,15):
                 tabela_suspeito.append(tabela[i][j])
 
-        clf.fit(arma_X, arma_y)
         palpite_arma = (clf.predict([tabela_arma]))
-
-        clf.fit(lugar_X, lugar_y)
-        palpite_lugar = (clf.predict([tabela_lugar]))
-
-        clf.fit(suspeito_X, suspeito_y)
-        palpite_suspeito = (clf.predict([tabela_suspeito]))
+        palpite_lugar = (clf1.predict([tabela_lugar]))
+        palpite_suspeito = (clf2.predict([tabela_suspeito]))
 
         if crime[0] == palpite_arma: # Arma
             if crime[1] == palpite_lugar: # Arma e Lugar
@@ -407,14 +408,14 @@ def treinar():
         f"Com chance de {chance1}% de Corromper o 1\n",
         f"Com chance de {chance_menos1}% de Corromer o -1\n",
         f"\nAconteceram\n",
-        f"Acertos completos: {acertos}\n",
+        f"Acertou tudo: {acertos}\n",
         f"Acertos de Arma e Lugar: {acertos_arma_lugar}\n",
         f"Acertos de Arma e Suspeito: {acertos_arma_suspeito}\n",
         f"Acertos de Lugar e Suspeito: {acertos_lugar_suspeito}\n",
         f"Acertos apenas de Arma: {acertos_arma}\n",
         f"Acertos apenas de Lugar: {acertos_lugar}\n",
         f"Acertos apenas de Suspeito: {acertos_suspeito}\n",
-        f"Erros completos: {erros_totais}\n"
+        f"Errou tudo: {erros_totais}\n"
     ]
 
     print("".join(string))
