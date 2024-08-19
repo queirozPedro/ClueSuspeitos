@@ -566,7 +566,7 @@ def iniciar_treino_venn():
                    round((acertos/quant_testes)*100, 2)))
     
     plt.title(f"Resultado do treino (em %)")
-    plt.text(0.6, -0.6, f"Erros: {round((acertos/quant_testes)*100, 2)}", fontsize=12)
+    plt.text(0.6, -0.6, f"Erros: {round((erros_totais/quant_testes)*100, 2)}", fontsize=12)
     plt.show()
 
 def main(): 
