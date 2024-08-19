@@ -295,17 +295,17 @@ def criar_cenario(chance1, chance_menos1):
     crime = gerar_crime()
     return crime, corromper_tabela(gerar_tabela(gerar_jogadores(gerar_evidencias(crime))), chance1, chance_menos1)
 
-def treinar():
+def iniciar_treino():
     print(f"\n\nCaracteristicas do Treino")
-    quant_dados_jogos = int(input("Quantidade de Jogos para Treinamento: "))
-    quant_palpites = int(input("Quantidade de Palpites Automáticos: "))
+    quant_jogos_entrada = int(input("Quantidade de Jogos para Treinamento: "))
+    quant_testes = int(input("Quantidade de Palpites Automáticos: "))
     print(f"Informações adicionais")
     chance1 = int(input("Chance de Corromper o 1: "))
     chance_menos1 = int(input("Chance de Corromper o -1: "))
 
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(16, 1), random_state=1)
-    clf1 = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(20, 1), random_state=1)
-    clf2 = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(24, 1), random_state=1)
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 3), random_state=1, max_iter=1000000)
+    clf1 = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 3), random_state=1, max_iter=1000000)
+    clf2 = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 3), random_state=1, max_iter=1000000)
 
     # Os itens nomeados com X serão as tabelas com 0, 1 e -1 referentes aos jogadores.
     arma_X = []
@@ -317,7 +317,7 @@ def treinar():
     suspeito_y = []
 
     # Base de dados
-    for n in range(quant_dados_jogos):
+    for n in range(quant_jogos_entrada):
         # Vou criar o crime e a tabela
         crime, tabela = criar_cenario(chance1, chance_menos1)
         # Distribuir o crime em seu respectivos y
@@ -360,7 +360,7 @@ def treinar():
     acertos_arma_suspeito = 0
     acertos_lugar_suspeito = 0
 
-    for m in range(quant_palpites):
+    for m in range(quant_testes):
         crime, tabela = criar_cenario(chance1, chance_menos1)
 
         tabela_arma = []
@@ -403,27 +403,25 @@ def treinar():
             erros_totais += 1
 
     string = [
-        f"\n\nPara um total de {quant_dados_jogos} jogos para treino\n",
-        f"Para um total de {quant_palpites} palpites\n",
+        f"\n\nCom um total de {quant_jogos_entrada} entradas de jogos\n",
+        f"Para um total de {quant_testes} testes automáticos e aleatórios\n",
         f"Com chance de {chance1}% de Corromper o 1\n",
         f"Com chance de {chance_menos1}% de Corromer o -1\n",
-        f"\nAconteceram\n",
-        f"Acertou tudo: {acertos}\n",
-        f"Acertou somente Arma e Lugar: {acertos_arma_lugar}\n",
-        f"Acertou somente Arma e Suspeito: {acertos_arma_suspeito}\n",
-        f"Acertou somente Lugar e Suspeito: {acertos_lugar_suspeito}\n",
-        f"Acertou apenas de Arma: {acertos_arma}\n",
-        f"Acertou apenas de Lugar: {acertos_lugar}\n",
-        f"Acertou apenas de Suspeito: {acertos_suspeito}\n",
-        f"Errou tudo: {erros_totais}\n"
+        f"\Resultado\n",
+        f"Acertou tudo: {(acertos/quant_testes)*100:.2f}%\n",
+        f"Acertou somente Arma e Lugar: {(acertos_arma_lugar/quant_testes)*100:.2f}%\n",
+        f"Acertou somente Arma e Suspeito: {(acertos_arma_suspeito/quant_testes)*100:.2f}%\n",
+        f"Acertou somente Lugar e Suspeito: {(acertos_lugar_suspeito/quant_testes)*100:.2f}%\n",
+        f"Acertou apenas a Arma: {(acertos_arma/quant_testes)*100:.2f}%\n",
+        f"Acertou apenas o Lugar: {(acertos_lugar/quant_testes)*100:.2f}%\n",
+        f"Acertou apenas o Suspeito: {(acertos_suspeito/quant_testes)*100:.2f}%\n",
+        f"Errou tudo: {(erros_totais/quant_testes)*100:.2f}%\n"
     ]
 
     print("".join(string))
-                
 
 def main(): 
-    treinar()
-    # gerar_jogo_arquivo()
+    iniciar_treino()
 
 
 if __name__ == "__main__":
