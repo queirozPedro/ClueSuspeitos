@@ -529,23 +529,23 @@ def iniciar_treino_venn():
         else:
             erros_totais += 1
 
-    # # Vou deixar comentado aqui só para caso queira tirar a prova
-    # string = [
-    #     f"\n\nCom um total de {quant_jogos_entrada} entradas de jogos\n",
-    #     f"Para um total de {quant_testes} testes automáticos e aleatórios\n",
-    #     f"Com chance de {chance1}% de Corromper o 1\n",
-    #     f"Com chance de {chance_menos1}% de Corromer o -1\n",
-    #     f"Resultado\n",
-    #     f"Acertou tudo: {(acertos/quant_testes)*100:.2f}%\n",
-    #     f"Acertou somente Arma e Lugar: {(acertos_arma_lugar/quant_testes)*100:.2f}%\n",
-    #     f"Acertou somente Arma e Suspeito: {(acertos_arma_suspeito/quant_testes)*100:.2f}%\n",
-    #     f"Acertou somente Lugar e Suspeito: {(acertos_lugar_suspeito/quant_testes)*100:.2f}%\n",
-    #     f"Acertou apenas a Arma: {(acertos_arma/quant_testes)*100:.2f}%\n",
-    #     f"Acertou apenas o Lugar: {(acertos_lugar/quant_testes)*100:.2f}%\n",
-    #     f"Acertou apenas o Suspeito: {(acertos_suspeito/quant_testes)*100:.2f}%\n",
-    #     f"Errou tudo: {(erros_totais/quant_testes)*100:.2f}%\n"
-    # ]
-    # print("".join(string))
+    # Vou deixar  aqui só para caso queira tirar a prova
+    string = [
+        f"\n\nCom um total de {quant_jogos_entrada} entradas de jogos\n",
+        f"Para um total de {quant_testes} testes automáticos e aleatórios\n",
+        f"Com chance de {chance1}% de Corromper o 1\n",
+        f"Com chance de {chance_menos1}% de Corromer o -1\n",
+        f"Resultado\n",
+        f"Acertou tudo: {acertos} ou {(acertos/quant_testes)*100:.2f}%\n",
+        f"Acertou somente Arma e Lugar: {acertos_arma_lugar} ou {(acertos_arma_lugar/quant_testes)*100:.2f}%\n",
+        f"Acertou somente Arma e Suspeito: {acertos_arma_suspeito} ou {(acertos_arma_suspeito/quant_testes)*100:.2f}%\n",
+        f"Acertou somente Lugar e Suspeito: {acertos_lugar_suspeito} ou {(acertos_lugar_suspeito/quant_testes)*100:.2f}%\n",
+        f"Acertou apenas a Arma: {acertos_arma} ou {(acertos_arma/quant_testes)*100:.2f}%\n",
+        f"Acertou apenas o Lugar: {acertos_lugar} ou {(acertos_lugar/quant_testes)*100:.2f}%\n",
+        f"Acertou apenas o Suspeito: {acertos_suspeito} ou {(acertos_suspeito/quant_testes)*100:.2f}%\n",
+        f"Errou tudo: {erros_totais} ou {(erros_totais/quant_testes)*100:.2f}%\n"
+    ]
+    print("".join(string))
 
     venn3(subsets=(round((acertos_arma/quant_testes)*100, 2), 
                    round((acertos_lugar/quant_testes)*100, 2), 
@@ -566,7 +566,13 @@ def iniciar_treino_venn():
                    round((acertos/quant_testes)*100, 2)))
     
     plt.title(f"Resultado do treino (em %)")
-    plt.text(0.6, -0.6, f"Erros: {round((erros_totais/quant_testes)*100, 2)}", fontsize=12)
+    string = [
+        f"Total de entradas: {quant_jogos_entrada}\n",
+        f"Total de testes: {quant_testes}\n",
+        f"Corrupção de 1 e -1: {chance1}%, {chance_menos1}%",
+    ]
+    plt.text(-1, -0.8, "".join(string), fontsize=10)
+    plt.text(0.5, -0.5, f"Erros: {round((erros_totais/quant_testes)*100, 2)}", fontsize=12)
     plt.show()
 
 def main(): 
