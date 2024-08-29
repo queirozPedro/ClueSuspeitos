@@ -1,7 +1,6 @@
 from sklearn.model_selection import GridSearchCV
 from sklearn.neural_network import MLPClassifier
-import numpy as np
-from joblib import parallel_backend
+from sklearn.metrics import classification_report, confusion_matrix
 
 from matplotlib_venn import venn3, venn3_circles
 from matplotlib import pyplot as plt
@@ -87,8 +86,11 @@ def treinar(entradas, jogos_teste, chance1, chance_menos1):
 
     # 'Cria' ou 'faz' os treinos
     grid_search_arma.fit(arma_X, arma_y)
+    print("\nAjustou a Arma")
     grid_search_lugar.fit(lugar_X, lugar_y)
-    grid_search_suspeito.fit(suspeito_X, suspeito_y)
+    print("Ajustou o Lugar")
+    grid_search_suspeito.fit(suspeito_X, suspeito_y) 
+    print("Ajustou o Suspeito\n")
 
     # Todas as possibilidades de acertos e erros
     acertos = 0
@@ -141,6 +143,21 @@ def treinar(entradas, jogos_teste, chance1, chance_menos1):
             acertos_suspeito += 1
         else:
             erros_totais += 1
+
+    print("\n\nArma Classification Report:")
+    print(classification_report(arma_y, grid_search_arma.predict(arma_X)))
+    print("Confusion Matrix:")
+    print(confusion_matrix(arma_y, grid_search_arma.predict(arma_X)))
+
+    print("\n\nLugar Classification Report:")
+    print(classification_report(lugar_y, grid_search_lugar.predict(lugar_X)))
+    print("Confusion Matrix:")
+    print(confusion_matrix(lugar_y, grid_search_lugar.predict(lugar_X)))
+    
+    print("\n\nSuspeito Classification Report:")
+    print(classification_report(suspeito_y, grid_search_suspeito.predict(suspeito_X)))
+    print("Confusion Matrix:")
+    print(confusion_matrix(suspeito_y, grid_search_suspeito.predict(suspeito_X)))
 
     # Vou deixar  aqui só para caso queira tirar a prova
     string = [
