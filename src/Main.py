@@ -78,7 +78,13 @@ def definir_param_grid():
     }
     return (param_grid_arma, param_grid_lugar, param_grid_suspeito)
 
-def treinar(dados, jogos_teste, chance1, chance_menos1):
+def exibir_info_treino(name, item_X, item_y, grid_search_item):
+    print(f"\n{name} Classification Report:")
+    print(classification_report(item_y, grid_search_item.predict(item_X)))
+    print("Confusion Matrix:")
+    print(f"{confusion_matrix(item_y, grid_search_item.predict(item_X))}\n")
+
+def treinar(dados, testes, chance1, chance_menos1):
 
     max_iter = 10000000;
     clf_arma = MLPClassifier(hidden_layer_sizes=(8, 4), activation='relu', solver='adam', alpha=0.0001, max_iter=max_iter, random_state=1)
@@ -117,7 +123,7 @@ def treinar(dados, jogos_teste, chance1, chance_menos1):
     acertos_unitarios = [0, 0, 0] # acertos_arma -> 0,  acertos_lugar -> 1, acertos_suspeito -> 2
     erros = 0
 
-    for m in range(jogos_teste):
+    for m in range(testes):
         crime, tabela = criar_cenario(chance1, chance_menos1)
 
         tabela_arma = []
@@ -159,47 +165,36 @@ def treinar(dados, jogos_teste, chance1, chance_menos1):
         else:
             erros += 1
 
-    print("\n\nArma Classification Report:")
-    print(classification_report(arma_y, grid_search_arma.predict(arma_X)))
-    print("Confusion Matrix:")
-    print(confusion_matrix(arma_y, grid_search_arma.predict(arma_X)))
-
-    print("\n\nLugar Classification Report:")
-    print(classification_report(lugar_y, grid_search_lugar.predict(lugar_X)))
-    print("Confusion Matrix:")
-    print(confusion_matrix(lugar_y, grid_search_lugar.predict(lugar_X)))
-    
-    print("\n\nSuspeito Classification Report:")
-    print(classification_report(suspeito_y, grid_search_suspeito.predict(suspeito_X)))
-    print("Confusion Matrix:")
-    print(confusion_matrix(suspeito_y, grid_search_suspeito.predict(suspeito_X)))
+    exibir_info_treino("Arma", arma_X, arma_y, grid_search_arma)
+    exibir_info_treino("Lugar", lugar_X, lugar_y, grid_search_lugar)
+    exibir_info_treino("Suspeito", suspeito_X, suspeito_y, grid_search_suspeito)
 
     # Vou deixar aqui só para caso queira tirar a prova
     string = [
         f"\n\nCom um total de {dados} dados de jogos\n",
-        f"Para um total de {jogos_teste} testes automáticos e aleatórios\n",
+        f"Para um total de {testes} testes automáticos e aleatórios\n",
         f"Com chance de {chance1}% de Corromper o 1\n",
         f"Com chance de {chance_menos1}% de Corromer o -1\n",
         f"Resultado\n",
-        f"Acertou tudo: {acertos} ou {(acertos/jogos_teste)*100:.2f}%\n",
-        f"Acertou somente Arma e Lugar: {acertos_duplos[0]} ou {(acertos_duplos[0]/jogos_teste)*100:.2f}%\n",
-        f"Acertou somente Arma e Suspeito: {acertos_duplos[1]} ou {(acertos_duplos[1]/jogos_teste)*100:.2f}%\n",
-        f"Acertou somente Lugar e Suspeito: {acertos_duplos[2]} ou {(acertos_duplos[2]/jogos_teste)*100:.2f}%\n",
-        f"Acertou apenas a Arma: {acertos_unitarios[0]} ou {(acertos_unitarios[0]/jogos_teste)*100:.2f}%\n",
-        f"Acertou apenas o Lugar: {acertos_unitarios[1]} ou {(acertos_unitarios[1]/jogos_teste)*100:.2f}%\n",
-        f"Acertou apenas o Suspeito: {acertos_unitarios[2]} ou {(acertos_unitarios[2]/jogos_teste)*100:.2f}%\n",
-        f"Errou tudo: {erros} ou {(erros/jogos_teste)*100:.2f}%\n"
+        f"Acertou tudo: {acertos} ou {(acertos/testes)*100:.2f}%\n",
+        f"Acertou somente Arma e Lugar: {acertos_duplos[0]} ou {(acertos_duplos[0]/testes)*100:.2f}%\n",
+        f"Acertou somente Arma e Suspeito: {acertos_duplos[1]} ou {(acertos_duplos[1]/testes)*100:.2f}%\n",
+        f"Acertou somente Lugar e Suspeito: {acertos_duplos[2]} ou {(acertos_duplos[2]/testes)*100:.2f}%\n",
+        f"Acertou apenas a Arma: {acertos_unitarios[0]} ou {(acertos_unitarios[0]/testes)*100:.2f}%\n",
+        f"Acertou apenas o Lugar: {acertos_unitarios[1]} ou {(acertos_unitarios[1]/testes)*100:.2f}%\n",
+        f"Acertou apenas o Suspeito: {acertos_unitarios[2]} ou {(acertos_unitarios[2]/testes)*100:.2f}%\n",
+        f"Errou tudo: {erros} ou {(erros/testes)*100:.2f}%\n"
     ]
     print("".join(string))
     
     subsets = [
-        round((acertos_unitarios[0]/jogos_teste)*100, 2), 
-            round((acertos_unitarios[1]/jogos_teste)*100, 2), 
-            round((acertos_duplos[0]/jogos_teste)*100, 2), 
-            round((acertos_unitarios[2]/jogos_teste)*100, 2),
-            round((acertos_duplos[1]/jogos_teste)*100, 2), 
-            round((acertos_duplos[2]/jogos_teste)*100, 2),
-            round((acertos/jogos_teste)*100, 2)
+        round((acertos_unitarios[0]/testes)*100, 2), 
+            round((acertos_unitarios[1]/testes)*100, 2), 
+            round((acertos_duplos[0]/testes)*100, 2), 
+            round((acertos_unitarios[2]/testes)*100, 2),
+            round((acertos_duplos[1]/testes)*100, 2), 
+            round((acertos_duplos[2]/testes)*100, 2),
+            round((acertos/testes)*100, 2)
     ]
 
     venn3(subsets=subsets, 
@@ -212,23 +207,23 @@ def treinar(dados, jogos_teste, chance1, chance_menos1):
     plt.title(f"Resultado do treino (em %)")
     string = [
         f"Total de dados: {dados}\n",
-        f"Total de testes: {jogos_teste}\n",
+        f"Total de testes: {testes}\n",
         f"Corrupção de 1 e -1: {chance1}%, {chance_menos1}%",
     ]
     plt.text(-1, -0.8, "".join(string), fontsize=10)
-    plt.text(0.5, -0.5, f"Erros: {round((erros/jogos_teste)*100, 2)}", fontsize=12)
-    plt.savefig(f'{dados}_dados_e_{jogos_teste}_testes_{chance1}%_para_1_e_{chance_menos1}%_para_-1')
+    plt.text(0.5, -0.5, f"Erros: {round((erros/testes)*100, 2)}", fontsize=12)
+    plt.savefig(f'{dados}_dados_e_{testes}_testes_{chance1}%_para_1_e_{chance_menos1}%_para_-1')
     # plt.show()
     plt.clf()
 
 def treino_unitario():
     print(f"\n\nCaracteristicas do Treino")
     dados = int(input("Quantidade de Dados do Treinamento: "))
-    jogos_teste = int(input("Quantidade de Testes: "))
+    testes = int(input("Quantidade de Testes: "))
     print(f"Informações adicionais")
     chance1 = int(input("Chance de Corromper o 1: "))
     chance_menos1 = int(input("Chance de Corromper o -1: "))
-    treinar(dados, jogos_teste, chance1, chance_menos1)
+    treinar(dados, testes, chance1, chance_menos1)
 
 def main(): 
     treino_unitario()
