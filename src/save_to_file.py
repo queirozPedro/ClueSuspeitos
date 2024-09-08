@@ -8,9 +8,10 @@ def gerar_tabelas_txt():
     print("Caracteristicas do Arquivo Txt")
     
     quant_tabelas = int(input("Quantidade de Tabelas: "))
-    chance1 = int(input("Probabilidade de 1 ser corrompido(0 a 100): "))
-    chance_menos1 = int(input("Probabilidade de -1 ser corrompido(0 a 100): "))
-    nome_arquivo = f'{quant_tabelas}_jogos_com_{chance1}%_para_1_e_{chance_menos1}%_para_-1.txt'
+    chance = [0, 0]
+    chance[0] = int(input("Probabilidade de 1 ser corrompido(0 a 100): "))
+    chance[1] = int(input("Probabilidade de -1 ser corrompido(0 a 100): "))
+    nome_arquivo = f'{quant_tabelas}_jogos_com_{chance[0]}%_para_1_e_{chance[1]}%_para_-1.txt'
 
     cartas = [
         "Castical(01)", "Corda(02)", "Faca(03)", "Revolver(04)",
@@ -25,12 +26,12 @@ def gerar_tabelas_txt():
             crime = gerar_crime()
             evidencias = gerar_evidencias(crime)
             jogadores = gerar_jogadores(evidencias)
-            tabela = corromper_tabela(gerar_tabela(jogadores), chance1, chance_menos1)
+            tabela = corromper_tabela(gerar_tabela(jogadores), chance)
 
             linhas = [
                 f'Jogo {i+1} de {quant_tabelas}\n',
-                f'{chance1}% de chance de corromper o 1\n',
-                f'{chance_menos1}% de chance de corromper o -1\n\n',
+                f'{chance[0]}% de chance de corromper o 1\n',
+                f'{chance[1]}% de chance de corromper o -1\n\n',
                 f'Crime: {cartas[crime[0]-1]}, {cartas[crime[1]-1]}, {cartas[crime[2]-1]}\n',
                 f'Jogador 0: {cartas[jogadores[0][0]-1]}, {cartas[jogadores[0][1]-1]}, {cartas[jogadores[0][2]-1]}\n',
                 f'Jogador 1: {cartas[jogadores[1][0]-1]}, {cartas[jogadores[1][1]-1]}, {cartas[jogadores[1][2]-1]}\n',
@@ -52,9 +53,10 @@ def gerar_tabelas_tex():
     print("Caracteristicas do Arquivo LaTex")
     
     quant_tabelas = int(input("Quantidade de Tabelas: "))
-    chance1 = int(input("Probabilidade de 1 ser corrompido(0 a 100): "))
-    chance_menos1 = int(input("Probabilidade de -1 ser corrompido(0 a 100): "))
-    nome_arquivo = f'{quant_tabelas}_jogos_com_{chance1}%_para_1_e_{chance_menos1}%_para_-1.tex'
+    chance = [0, 0]
+    chance[0] = int(input("Probabilidade de 1 ser corrompido(0 a 100): "))
+    chance[1] = int(input("Probabilidade de -1 ser corrompido(0 a 100): "))
+    nome_arquivo = f'{quant_tabelas}_jogos_com_{chance[0]}%_para_1_e_{chance[1]}%_para_-1.tex'
 
     with open(nome_arquivo, 'w') as arquivo:
         
@@ -72,7 +74,7 @@ def gerar_tabelas_tex():
             crime = gerar_crime()
             evidencias = gerar_evidencias(crime)
             jogadores = gerar_jogadores(evidencias)
-            tabela = corromper_tabela(gerar_tabela(jogadores), chance1, chance_menos1)
+            tabela = corromper_tabela(gerar_tabela(jogadores), chance)
 
             cartas = [
                 "01 - Castical", "02 - Corda", "03 - Faca", "04 - Revolver",

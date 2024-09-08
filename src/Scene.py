@@ -1,4 +1,4 @@
-from Table import *
+from table import *
 import numpy as np
 
 '''
@@ -81,7 +81,7 @@ def gerar_tabela(jogadores):
 
     return tabela.tolist()
 
-def corromper_tabela(tabela, chance1, chance_menos1):
+def corromper_tabela(tabela, chance):
     '''
     Método que corrompe uma tabela. Recebe a tabela junto as chances de corromper o 
     número 1 e o -1. Retorna a tabela corrompida. 
@@ -89,16 +89,16 @@ def corromper_tabela(tabela, chance1, chance_menos1):
     for i in range(15):
         for j in range(1,4):
             if tabela[j][i] == 1:
-                if np.random.randint(0, 100) < chance1:
+                if np.random.randint(0, 100) < chance[0]:
                     tabela[j][i] = 0
             elif tabela[j][i] == -1:
-                if np.random.randint(0, 100) < chance_menos1:
+                if np.random.randint(0, 100) < chance[1]:
                     tabela[j][i] = 0
     return tabela;
 
-def criar_cenario(chance1, chance_menos1):
+def criar_cenario(chance):
     '''
     O método criar_cenario, cria o cenario do crime e retorna o array do crime e a tabela já corrompida.
     '''
     crime = gerar_crime()
-    return crime, corromper_tabela(gerar_tabela(gerar_jogadores(gerar_evidencias(crime))), chance1, chance_menos1)
+    return crime, corromper_tabela(gerar_tabela(gerar_jogadores(gerar_evidencias(crime))), chance)

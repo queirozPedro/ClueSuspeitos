@@ -22,7 +22,7 @@ def gerar_string_tabela(tabela):
         string += '\n'
     return(string)
 
-def gerar_string_tabela_detalhada(tabela, chance1, chance_menos1, crime):
+def gerar_string_tabela_detalhada(tabela, chance, crime):
 
     cartas = [
         "01 - Castical       ", "02 - Corda          ", "03 - Faca           ", "04 - Revolver       ",
@@ -31,7 +31,7 @@ def gerar_string_tabela_detalhada(tabela, chance1, chance_menos1, crime):
         "13 - Plum           ", "14 - Scarlet        ", "15 - White          "
     ]
 
-    string = f'\nCrime: {crime}\nChance de corromper o  1: {chance1}\nChance de corromper o -1: {chance_menos1}\n\n'
+    string = f'\nCrime: {crime}\nChance de corromper o  1: {chance[0]}\nChance de corromper o -1: {chance[1]}\n\n'
 
     for i in range(15):
         string += f'|{cartas[i] }|'
