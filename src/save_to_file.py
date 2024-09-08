@@ -1,4 +1,4 @@
-from Scene import *
+from scene import *
 
 def gerar_tabelas_txt():
     '''

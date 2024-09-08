@@ -6,9 +6,10 @@ from matplotlib_venn import venn3, venn3_circles
 from matplotlib import pyplot as plt
 from matplotlib_venn.layout.venn3 import DefaultLayoutAlgorithm
 
-from Scene import *
-from SaveToFile import *
-from Table import *
+from scene import *
+from save_to_file import *
+from table import *
+
 
 def gerar_dados(dados, chance1, chance_menos1):
     '''
@@ -27,7 +28,7 @@ def gerar_dados(dados, chance1, chance_menos1):
     suspeito_y = []
 
     # Base de dados
-    for n in range(dados):
+    for _ in range(dados):
         # Vou criar o crime e a tabela
         crime, tabela = criar_cenario(chance1, chance_menos1)
         # Distribuir o crime em seu respectivos y
@@ -57,6 +58,7 @@ def gerar_dados(dados, chance1, chance_menos1):
 
     return (arma_X, arma_y, lugar_X, lugar_y, suspeito_X, suspeito_y)
 
+
 def definir_param_grid():
     '''
     Função que retorna os param_grid de arma, lugar e suspeito
@@ -78,11 +80,13 @@ def definir_param_grid():
     }
     return (param_grid_arma, param_grid_lugar, param_grid_suspeito)
 
+
 def exibir_info_treino(name, item_X, item_y, grid_search_item):
     print(f"\n{name} Classification Report:")
     print(classification_report(item_y, grid_search_item.predict(item_X)))
     print("Confusion Matrix:")
     print(f"{confusion_matrix(item_y, grid_search_item.predict(item_X))}\n")
+
 
 def treinar(dados, testes, chance1, chance_menos1):
 
@@ -117,13 +121,16 @@ def treinar(dados, testes, chance1, chance_menos1):
     # clf_suspeito.fit(suspeito_X, suspeito_y)
 
     # Todas as possibilidades de acertos e erros
-
     acertos = 0
-    acertos_duplos = [0, 0, 0] # acertos_arma_lugar -> 0, acertos_arma_suspeito -> 1, acertos_lugar_suspeito -> 2
-    acertos_unitarios = [0, 0, 0] # acertos_arma -> 0,  acertos_lugar -> 1, acertos_suspeito -> 2
+    acertos_arma = 0
+    acertos_lugar = 0
+    acertos_suspeito = 0
+    acertos_arma_lugar = 0
+    acertos_lugar_suspeito = 0
+    acertos_suspeito_arma = 0
     erros = 0
 
-    for m in range(testes):
+    for _ in range(testes):
         crime, tabela = criar_cenario(chance1, chance_menos1)
 
         tabela_arma = []
@@ -150,18 +157,18 @@ def treinar(dados, testes, chance1, chance_menos1):
                 if crime[2] == palpite_suspeito: # Arma, lugar e suspeito
                     acertos += 1
                 else:
-                    acertos_duplos[0] += 1
+                    acertos_arma_lugar += 1
             elif crime[2] == palpite_suspeito: # Arma e suspeito
-                acertos_duplos[1] += 1
+                acertos_suspeito_arma += 1
             else:
-                acertos_unitarios[0] += 1
+                acertos_arma += 1
         elif crime[1] == palpite_lugar: # Lugar
             if crime[2] == palpite_suspeito: # Lugar e suspeito
-                acertos_duplos[2] += 1
+                acertos_lugar_suspeito += 1
             else:
-                acertos_unitarios[1] += 1
+                acertos_lugar += 1
         elif crime[2] == palpite_suspeito: # Suspeito
-            acertos_unitarios[2] += 1
+            acertos_suspeito += 1
         else:
             erros += 1
 
@@ -177,23 +184,23 @@ def treinar(dados, testes, chance1, chance_menos1):
         f"Com chance de {chance_menos1}% de Corromer o -1\n",
         f"Resultado\n",
         f"Acertou tudo: {acertos} ou {(acertos/testes)*100:.2f}%\n",
-        f"Acertou somente Arma e Lugar: {acertos_duplos[0]} ou {(acertos_duplos[0]/testes)*100:.2f}%\n",
-        f"Acertou somente Arma e Suspeito: {acertos_duplos[1]} ou {(acertos_duplos[1]/testes)*100:.2f}%\n",
-        f"Acertou somente Lugar e Suspeito: {acertos_duplos[2]} ou {(acertos_duplos[2]/testes)*100:.2f}%\n",
-        f"Acertou apenas a Arma: {acertos_unitarios[0]} ou {(acertos_unitarios[0]/testes)*100:.2f}%\n",
-        f"Acertou apenas o Lugar: {acertos_unitarios[1]} ou {(acertos_unitarios[1]/testes)*100:.2f}%\n",
-        f"Acertou apenas o Suspeito: {acertos_unitarios[2]} ou {(acertos_unitarios[2]/testes)*100:.2f}%\n",
+        f"Acertou somente Arma e Lugar: {acertos_arma_lugar} ou {(acertos_arma_lugar/testes)*100:.2f}%\n",
+        f"Acertou somente Arma e Suspeito: {acertos_suspeito_arma} ou {(acertos_suspeito_arma/testes)*100:.2f}%\n",
+        f"Acertou somente Lugar e Suspeito: {acertos_lugar_suspeito} ou {(acertos_lugar_suspeito/testes)*100:.2f}%\n",
+        f"Acertou apenas a Arma: {acertos_arma} ou {(acertos_arma/testes)*100:.2f}%\n",
+        f"Acertou apenas o Lugar: {acertos_lugar} ou {(acertos_lugar/testes)*100:.2f}%\n",
+        f"Acertou apenas o Suspeito: {acertos_suspeito} ou {(acertos_suspeito/testes)*100:.2f}%\n",
         f"Errou tudo: {erros} ou {(erros/testes)*100:.2f}%\n"
     ]
     print("".join(string))
     
     subsets = [
-        round((acertos_unitarios[0]/testes)*100, 2), 
-            round((acertos_unitarios[1]/testes)*100, 2), 
-            round((acertos_duplos[0]/testes)*100, 2), 
-            round((acertos_unitarios[2]/testes)*100, 2),
-            round((acertos_duplos[1]/testes)*100, 2), 
-            round((acertos_duplos[2]/testes)*100, 2),
+        round((acertos_arma/testes)*100, 2), 
+            round((acertos_lugar/testes)*100, 2), 
+            round((acertos_arma_lugar/testes)*100, 2), 
+            round((acertos_suspeito/testes)*100, 2),
+            round((acertos_suspeito_arma/testes)*100, 2), 
+            round((acertos_lugar_suspeito/testes)*100, 2),
             round((acertos/testes)*100, 2)
     ]
 
@@ -216,6 +223,7 @@ def treinar(dados, testes, chance1, chance_menos1):
     # plt.show()
     plt.clf()
 
+
 def treino_unitario():
     print(f"\n\nCaracteristicas do Treino")
     dados = int(input("Quantidade de Dados do Treinamento: "))
@@ -224,6 +232,7 @@ def treino_unitario():
     chance1 = int(input("Chance de Corromper o 1: "))
     chance_menos1 = int(input("Chance de Corromper o -1: "))
     treinar(dados, testes, chance1, chance_menos1)
+
 
 def main(): 
     treino_unitario()

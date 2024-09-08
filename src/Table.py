@@ -1,5 +1,4 @@
-from Scene import *
-import numpy as np
+from scene import *
 
 def gerar_string_tabela(tabela):
 
