@@ -1,6 +1,5 @@
 from sklearn.model_selection import GridSearchCV
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import classification_report, confusion_matrix
 
 from matplotlib_venn import venn3, venn3_circles
 from matplotlib import pyplot as plt
@@ -19,22 +18,18 @@ def gerar_dados(dados, chance):
     Retorna X seguido de y para cada tipo de carta.
     '''
     # Os itens nomeados com X serão as tabelas com 0, 1 e -1 referentes aos jogadores.
-    arma_X = []
-    lugar_X = []
-    suspeito_X = []
+    itens_X = [[],[],[]]
     # Os itens nomeados com y serão as respostas dos crimes.
-    arma_y = []
-    lugar_y = []
-    suspeito_y = []
+    itens_y = [[],[],[]]
 
     # Base de dados
     for _ in range(dados):
         # Vou criar o crime e a tabela
         crime, tabela = criar_cenario(chance)
         # Distribuir o crime em seu respectivos y
-        arma_y.append(crime[0])
-        lugar_y.append(crime[1])
-        suspeito_y.append(crime[2])
+        itens_y[0].append(crime[0])
+        itens_y[1].append(crime[1])
+        itens_y[2].append(crime[2])
 
         # Divide um array para cada tipo de carta
         # Um array com as informações de armas
@@ -42,21 +37,21 @@ def gerar_dados(dados, chance):
         for i in range(4):
             for j in range(4):
                 tabela_aux.append(tabela[i][j])
-        arma_X.append(tabela_aux)
+        itens_X[0].append(tabela_aux)
         # Um array com as informações de lugares
         tabela_aux = []
         for i in range(4):
             for j in range(4,9):
                 tabela_aux.append(tabela[i][j])
-        lugar_X.append(tabela_aux)
+        itens_X[1].append(tabela_aux)
         # Um array com as informações de suspeitos
         tabela_aux = []
         for i in range(4):
             for j in range(9,15):
                 tabela_aux.append(tabela[i][j])
-        suspeito_X.append(tabela_aux)
+        itens_X[2].append(tabela_aux)
 
-    return (arma_X, arma_y, lugar_X, lugar_y, suspeito_X, suspeito_y)
+    return (itens_X, itens_y)
 
 
 def definir_param_grid():
@@ -68,38 +63,49 @@ def definir_param_grid():
     Os param_grid são dicionários de diferentes combinações que 
     deseja testar no modelo.
     """
-    param_grid_arma = {
-        'hidden_layer_sizes': [(8, 4), (8,), (4,), (16, 8)],
-        'activation': ['identity', 'relu'],
-        'solver': ['adam', 'lbfgs'],
+    param_grid = []
+    # param_grid_arma -> 0
+    # param_grid_lugar -> 1
+    # param_grid_suspeito -> 2
+    param_grid.append({
+        'hidden_layer_sizes': [(16, 8), (8, 4), (8,), (4,)], 
+        'activation': ['identity'],
+        'solver': ['adam'],
         'learning_rate': ['constant', 'adaptive'],
-    }
-    param_grid_lugar = {
-        'hidden_layer_sizes': [(10, 5), (10,), (5,), (20, 10)],
-        'activation': ['identity', 'relu'],
-        'solver': ['adam', 'lbfgs'],
+    })
+    param_grid.append({
+        'hidden_layer_sizes': [(20, 10), (10, 5), (10,), (5,)], 
+        'activation': ['identity'],
+        'solver': ['adam'],
         'learning_rate': ['constant', 'adaptive'],
-    }
-    param_grid_suspeito = {
-        'hidden_layer_sizes': [(12, 6), (12,), (6,), (24, 12)],
-        'activation': ['identity', 'relu'],
-        'solver': ['adam', 'lbfgs'],
+    })
+    param_grid.append({
+        'hidden_layer_sizes': [(24, 12), (12, 6), (12,), (6,)],
+        'activation': ['identity'],
+        'solver': ['adam'],
         'learning_rate': ['constant', 'adaptive'],
-    }
-    return (param_grid_arma, param_grid_lugar, param_grid_suspeito)
+    })
+    return (param_grid)
 
 
-def exibir_info_treino(name, item_X, item_y, grid_search_item):
-    print(f"\n{name} Classification Report:")
-    print(classification_report(item_y, grid_search_item.predict(item_X)))
-    print("Confusion Matrix:")
-    print(f"{confusion_matrix(item_y, grid_search_item.predict(item_X))}\n")
+def definir_grid_search(clf, param_grid):
+    '''
+    Define os grid_search
+    '''
+    grid_search = []
+    grid_search.append(GridSearchCV(estimator=clf[0], param_grid=param_grid[0], n_jobs=-1, cv=3))
+    grid_search.append(GridSearchCV(estimator=clf[1], param_grid=param_grid[1], n_jobs=-1, cv=3))
+    grid_search.append(GridSearchCV(estimator=clf[2], param_grid=param_grid[2], n_jobs=-1, cv=3))
+
+    return(grid_search)
 
 
 def print_resultados(dados, testes, chance, resultados):
-    # Vou deixar aqui só para caso queira tirar a prova
+    '''
+    Recebe os dados do treino e exibe um relátorio geral
+    '''
     string = [
-        f"\n\nCom um total de {dados} dados de jogos\n",
+        f"\nCom um total de {dados} dados de jogos\n",
         f"Para um total de {testes} testes automáticos e aleatórios\n",
         f"Com chance de {chance[0]}% de Corromper o 1\n",
         f"Com chance de {chance[1]}% de Corromer o -1\n",
@@ -108,7 +114,7 @@ def print_resultados(dados, testes, chance, resultados):
         f"Acertou apenas a Arma: {resultados[1]} ou {(resultados[1]/testes)*100:.2f}%\n",
         f"Acertou apenas o Lugar: {resultados[2]} ou {(resultados[2]/testes)*100:.2f}%\n",
         f"Acertou apenas o Suspeito: {resultados[3]} ou {(resultados[3]/testes)*100:.2f}%\n",
-        f"Acertou apenas a Arma e Lugar: {resultados[4]} ou {(resultados[4]/testes)*100:.2f}%\n",
+        f"Acertou apenas a Arma e o Lugar: {resultados[4]} ou {(resultados[4]/testes)*100:.2f}%\n",
         f"Acertou apenas o Lugar e o Suspeito: {resultados[5]} ou {(resultados[5]/testes)*100:.2f}%\n",
         f"Acertou apenas o Suspeito e a Arma: {resultados[6]} ou {(resultados[6]/testes)*100:.2f}%\n",
         f"Errou tudo: {resultados[7]} ou {(resultados[7]/testes)*100:.2f}%\n"
@@ -117,7 +123,10 @@ def print_resultados(dados, testes, chance, resultados):
 
 
 def gerar_diagrama_venn(dados, testes, chance, resultados):
-    
+    '''
+    Função que gera um diagrama de Venn com base nas informações do treino
+    '''
+
     subsets = [
             round((resultados[1]/testes)*100, 2), 
             round((resultados[2]/testes)*100, 2), 
@@ -144,12 +153,14 @@ def gerar_diagrama_venn(dados, testes, chance, resultados):
     plt.text(-1, -0.8, "".join(string), fontsize=10)
     plt.text(0.5, -0.5, f"Erros: {round((resultados[7]/testes)*100, 2)}", fontsize=12)
     plt.savefig(f'{dados}_dados_e_{testes}_testes_{chance[0]}%_para_1_e_{chance[1]}%_para_-1')
-    # plt.show()
     plt.clf()
 
 
-def realizar_testes(testes, chance, grid_search_arma, grid_search_lugar, grid_search_suspeito):
-    
+def realizar_testes(testes, chance, grid_search):
+    '''
+    Função que faz os testes e retorna os resultados
+    '''
+
     resultados = [0, 0, 0, 0, 0, 0, 0, 0]
     """
     resultados[0] os que acertaram tudo (acertos)
@@ -181,9 +192,9 @@ def realizar_testes(testes, chance, grid_search_arma, grid_search_lugar, grid_se
             for j in range(9,15):
                 tabela_suspeito.append(tabela[i][j])
 
-        palpite_arma = (grid_search_arma.predict([tabela_arma]))
-        palpite_lugar = (grid_search_lugar.predict([tabela_lugar]))
-        palpite_suspeito = (grid_search_suspeito.predict([tabela_suspeito]))
+        palpite_arma = (grid_search[0].predict([tabela_arma]))
+        palpite_lugar = (grid_search[1].predict([tabela_lugar]))
+        palpite_suspeito = (grid_search[2].predict([tabela_suspeito]))
 
         if crime[0] == palpite_arma: # Arma
             if crime[1] == palpite_lugar: # Arma e Lugar
@@ -208,53 +219,66 @@ def realizar_testes(testes, chance, grid_search_arma, grid_search_lugar, grid_se
     return (resultados)
 
 
-def treinar(dados, testes, chance):
+def analisar_melhores_parametros(grid_search):
+    '''
+    Recebe os grid_search e retorna um relatório com as melhores combinações de parâmetros para esse treino
+    '''
+    melhores_parametros = [
+        f"Melhor combinação de parâmetros para Arma: {grid_search[0].best_params_}\n",
+        f"Melhor combinação de parâmetros para Lugar: {grid_search[1].best_params_}\n",
+        f"Melhor combinação de parâmetros para Suspeito: {grid_search[2].best_params_}"
+    ]
+    return "".join(melhores_parametros)
 
+
+def treinar(dados, testes, chance):
+    '''
+    Função que faz os treinamentos e testes com base nas chances de corromper 1 e -1.
+    Recebe a quantidade de dados, a qualidade de testes que serão feitos com base
+    neles, e as chances de corromper 1 e -1.
+    Retorna um array de resultados e uma string com informações sobre melhores 
+    combinações de parâmetros.
+    '''
     # Definir os modelos
-    clf_arma = MLPClassifier(max_iter=10000000)
-    clf_lugar = MLPClassifier(max_iter=10000000)
-    clf_suspeito = MLPClassifier(max_iter=10000000)
+    clf = []
+    # clf_arma -> 0
+    # clf_lugar -> 1
+    # clf_suspeito -> 2
+    for _ in range(3):
+        clf.append(MLPClassifier(max_iter=1000000000))
 
     # Definir os param_grid
-    param_grid_arma, param_grid_lugar, param_grid_suspeito = definir_param_grid()
+    param_grid = definir_param_grid()
     
-    # Configurar o grid_search
-    grid_search_arma = GridSearchCV(estimator=clf_arma, param_grid=param_grid_arma, n_jobs=-1, cv=3)
-    grid_search_lugar = GridSearchCV(estimator=clf_lugar, param_grid=param_grid_lugar, n_jobs=-1, cv=3)
-    grid_search_suspeito = GridSearchCV(estimator=clf_suspeito, param_grid=param_grid_suspeito, n_jobs=-1, cv=3)
-
+    # Definir os grid_search
+    grid_search = definir_grid_search(clf, param_grid)
+    
     # Gerar os Dados do treino
-    arma_X, arma_y, lugar_X, lugar_y, suspeito_X, suspeito_y = gerar_dados(dados, chance)
+    X_train, y_train = gerar_dados(dados, chance)
 
-    # Executar os Treinos
-    grid_search_arma.fit(arma_X, arma_y)
+    # Realizar os Ajustes
+    grid_search[0].fit(X_train[0], y_train[0])
     print("\nAjustou a Arma")
-    grid_search_lugar.fit(lugar_X, lugar_y)
+    grid_search[1].fit(X_train[1], y_train[1])
     print("Ajustou o Lugar")
-    grid_search_suspeito.fit(suspeito_X, suspeito_y) 
+    grid_search[2].fit(X_train[2], y_train[2]) 
     print("Ajustou o Suspeito\n")
 
-    # Melhor combinação de hiperparâmetros
-    print("Melhor combinação de parâmetros para Arma:", grid_search_arma.best_params_)
-    print("Melhor combinação de parâmetros para Lugar:", grid_search_lugar.best_params_)
-    print("Melhor combinação de parâmetros para Suspeito:", grid_search_suspeito.best_params_)
-
-    # Exibir informações e matriz de confusão de cada treino
-    # exibir_info_treino("Arma", arma_X, arma_y, grid_search_arma)
-    # exibir_info_treino("Lugar", lugar_X, lugar_y, grid_search_lugar)
-    # exibir_info_treino("Suspeito", suspeito_X, suspeito_y, grid_search_suspeito)
+    # Coleta as melhores combinações de parâmetros para cada tipo de carta
+    melhores_parametros = analisar_melhores_parametros(grid_search)
 
     # Faz os testes
-    resultados = realizar_testes(testes, chance, grid_search_arma, grid_search_lugar, grid_search_suspeito)
+    resultados = realizar_testes(testes, chance, grid_search)
     
-    # Exibe o resultado no terminal
-    print_resultados(dados, testes, chance, resultados)
-    
-    # Gera diagrama de Venn com base no resultado
-    gerar_diagrama_venn(dados, testes, chance, resultados)
+    # Retorna os resultados dos testes e os melhores parametros para cada tipo carta 
+    return resultados, melhores_parametros 
 
 
-def treino_unitario():
+def treinar_uma_vez():
+    '''
+    Coleta as informações e inicia um unico treino 
+    '''
+    # Coleta os caracteristicas do treino
     print(f"\n\nCaracteristicas do Treino")
     dados = int(input("Quantidade de Dados do Treinamento: "))
     testes = int(input("Quantidade de Testes: "))
@@ -262,11 +286,23 @@ def treino_unitario():
     chance = [0, 0]
     chance[0] = int(input("Chance de Corromper o 1: "))
     chance[1] = int(input("Chance de Corromper o -1: "))
-    treinar(dados, testes, chance)
+
+    # Faz os treinos e retorna os resultados
+    resultados, melhores_parametros = treinar(dados, testes, chance)
+    # Exibe quais os melhores parâmetros neste treino
+    print(melhores_parametros)
+    # Exibe o resultado no terminal
+    print_resultados(dados, testes, chance, resultados)
+    # Gera diagrama de Venn com base no resultado
+    gerar_diagrama_venn(dados, testes, chance, resultados)
+
+
+def treinar_muitas_vezes():
+    print()
 
 
 def main(): 
-    treino_unitario()
+    treinar_uma_vez()
 
 if __name__ == "__main__":
     main()
