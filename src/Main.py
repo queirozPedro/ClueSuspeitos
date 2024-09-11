@@ -69,20 +69,20 @@ def definir_param_grid():
     # param_grid_suspeito -> 2
     param_grid.append({
         'hidden_layer_sizes': [(16, 8), (8, 4), (8,), (4,)], 
-        'activation': ['identity'],
-        'solver': ['adam'],
+        'activation': ['identity', 'logistic'],
+        'solver': ['adam', 'lbfgs'],
         'learning_rate': ['constant', 'adaptive'],
     })
     param_grid.append({
         'hidden_layer_sizes': [(20, 10), (10, 5), (10,), (5,)], 
-        'activation': ['identity'],
-        'solver': ['adam'],
+        'activation': ['identity', 'logistic'],
+        'solver': ['adam', 'lbfgs'],
         'learning_rate': ['constant', 'adaptive'],
     })
     param_grid.append({
         'hidden_layer_sizes': [(24, 12), (12, 6), (12,), (6,)],
-        'activation': ['identity'],
-        'solver': ['adam'],
+        'activation': ['identity', 'logistic'],
+        'solver': ['adam', 'lbfgs'],
         'learning_rate': ['constant', 'adaptive'],
     })
     return (param_grid)
@@ -219,16 +219,16 @@ def realizar_testes(testes, chance, grid_search):
     return (resultados)
 
 
-def analisar_melhores_parametros(grid_search):
+def mostrar_parametros(grid_search):
     '''
     Recebe os grid_search e retorna um relatório com as melhores combinações de parâmetros para esse treino
     '''
     melhores_parametros = [
-        f"Melhor combinação de parâmetros para Arma: {grid_search[0].best_params_}\n",
-        f"Melhor combinação de parâmetros para Lugar: {grid_search[1].best_params_}\n",
-        f"Melhor combinação de parâmetros para Suspeito: {grid_search[2].best_params_}"
+        f"{grid_search[0].best_params_}\n",
+        f"{grid_search[1].best_params_}\n",
+        f"{grid_search[2].best_params_}"
     ]
-    return "".join(melhores_parametros)
+    return melhores_parametros
 
 
 def treinar(dados, testes, chance):
@@ -258,14 +258,14 @@ def treinar(dados, testes, chance):
 
     # Realizar os Ajustes
     grid_search[0].fit(X_train[0], y_train[0])
-    print("\nAjustou a Arma")
+    # print("\nAjustou a Arma")
     grid_search[1].fit(X_train[1], y_train[1])
-    print("Ajustou o Lugar")
+    # print("Ajustou o Lugar")
     grid_search[2].fit(X_train[2], y_train[2]) 
-    print("Ajustou o Suspeito\n")
+    # print("Ajustou o Suspeito\n")
 
     # Coleta as melhores combinações de parâmetros para cada tipo de carta
-    melhores_parametros = analisar_melhores_parametros(grid_search)
+    melhores_parametros = mostrar_parametros(grid_search)
 
     # Faz os testes
     resultados = realizar_testes(testes, chance, grid_search)
@@ -276,10 +276,10 @@ def treinar(dados, testes, chance):
 
 def treinar_uma_vez():
     '''
-    Coleta as informações e inicia um unico treino 
+    Coleta as informações e inicia um treino 
     '''
     # Coleta os caracteristicas do treino
-    print(f"\n\nCaracteristicas do Treino")
+    print(f"\n\nCaracteristicas do Treino Unico")
     dados = int(input("Quantidade de Dados do Treinamento: "))
     testes = int(input("Quantidade de Testes: "))
     print(f"Informações adicionais")
@@ -290,19 +290,86 @@ def treinar_uma_vez():
     # Faz os treinos e retorna os resultados
     resultados, melhores_parametros = treinar(dados, testes, chance)
     # Exibe quais os melhores parâmetros neste treino
-    print(melhores_parametros)
+    print("".join(melhores_parametros))
     # Exibe o resultado no terminal
     print_resultados(dados, testes, chance, resultados)
     # Gera diagrama de Venn com base no resultado
     gerar_diagrama_venn(dados, testes, chance, resultados)
 
 
-def treinar_muitas_vezes():
-    print()
+def treinar_100_vezes():
+    '''
+    Coleta as informações e inicia 100 treinos, onde a corrupção dos treinos começa
+    em um e vai até 100
+    '''
+    # Coleta os caracteristicas do treino
+    print("\n\nTreinar 100 vezes")
+    dados = int(input("Quantidade de dados para cada treinamento: "))
+    testes = int(input("Quantidade de testes para cada treinamento: "))
+    intervalo_analise = int(input("Intervalo entre as analises: "))
+    
+    param_cont = [
+        [0, 0, 0, 0, 0, 0],   
+        [0, 0, 0, 0, 0, 0],   
+        [0, 0, 0, 0, 0, 0]   
+    ]    
+    marco = 0
+    # 'hidden_layer_sizes': [(16, 8), (8, 4), (8,), (4,)], 
+    # 'activation': ['identity', 'logistic'],
+    # 'solver': ['adam', 'lbfgs'],
+    # 'learning_rate': ['constant', 'adaptive'],
+
+    for i in range(1, 101):
+        resultados, melhores_parametros = treinar(dados, testes, [i, i])
+        for j in range(3):
+            if 'identity' in melhores_parametros[j]:
+                param_cont[j][0] += 1
+            if 'logistic' in melhores_parametros[j]:
+                param_cont[j][1] += 1
+            if 'adam' in melhores_parametros[j]:
+                param_cont[j][2] += 1
+            if 'lbfgs' in melhores_parametros[j]:
+                param_cont[j][3] += 1
+            if 'constant' in melhores_parametros[j]:
+                param_cont[j][4] += 1
+            if 'adaptive' in melhores_parametros[j]:
+                param_cont[j][5] += 1
+            
+        if i%intervalo_analise == 0:
+            string = [
+                f"\nNo intervalo de {marco if marco != 0 else 1} até {i} ocorreram:\n",
+                f"Para Arma:\n",
+                f"Activation identity: {param_cont[0][0]}\n",
+                f"Activation logistic: {param_cont[0][1]}\n",
+                f"Solver adam: {param_cont[0][2]}\n",
+                f"Solver lbfgs: {param_cont[0][3]}\n",
+                f"Learning_rate constant: {param_cont[0][4]}\n",
+                f"Learning_rate adaptive: {param_cont[0][5]}\n",
+                
+                f"Para Lugar:\n",
+                f"Activation identity: {param_cont[1][0]}\n",
+                f"Activation logistic: {param_cont[1][1]}\n",
+                f"Solver adam: {param_cont[1][2]}\n",
+                f"Solver lbfgs: {param_cont[1][3]}\n",
+                f"Learning_rate constant: {param_cont[1][4]}\n",
+                f"Learning_rate adaptive: {param_cont[1][5]}\n",
+                
+                f"Para Suspeito:\n",
+                f"Activation identity: {param_cont[2][0]}\n",
+                f"Activation logistic: {param_cont[2][1]}\n",
+                f"Solver adam: {param_cont[2][2]}\n",
+                f"Solver lbfgs: {param_cont[2][3]}\n",
+                f"Learning_rate constant: {param_cont[2][4]}\n",
+                f"Learning_rate adaptive: {param_cont[2][5]}\n",
+            ]
+            print("".join(string))
+            for i in range(len(param_cont)):
+                param_cont[i] = [0] * len(param_cont[i])  
+            marco += intervalo_analise
 
 
 def main(): 
-    treinar_uma_vez()
+    treinar_100_vezes()
 
 if __name__ == "__main__":
     main()
