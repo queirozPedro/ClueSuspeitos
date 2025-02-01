@@ -9,7 +9,6 @@ from scene import *
 from save_to_file import *
 from table import *
 
-
 def gerar_dados(dados, chance):
     '''
     Função responsável por gerar a base de dados usada no treino.
@@ -70,19 +69,19 @@ def definir_param_grid():
     param_grid.append({
         'hidden_layer_sizes': [(16, 8), (8, 4), (8,), (4,)], 
         'activation': ['identity', 'logistic'],
-        'solver': ['adam', 'lbfgs'],
+        'solver': ['adam'],
         'learning_rate': ['constant', 'adaptive'],
     })
     param_grid.append({
         'hidden_layer_sizes': [(20, 10), (10, 5), (10,), (5,)], 
         'activation': ['identity', 'logistic'],
-        'solver': ['adam', 'lbfgs'],
+        'solver': ['adam'],
         'learning_rate': ['constant', 'adaptive'],
     })
     param_grid.append({
         'hidden_layer_sizes': [(24, 12), (12, 6), (12,), (6,)],
         'activation': ['identity', 'logistic'],
-        'solver': ['adam', 'lbfgs'],
+        'solver': ['adam'],
         'learning_rate': ['constant', 'adaptive'],
     })
     return (param_grid)
@@ -258,11 +257,11 @@ def treinar(dados, testes, chance):
 
     # Realizar os Ajustes
     grid_search[0].fit(X_train[0], y_train[0])
-    # print("\nAjustou a Arma")
+    print("\nAjustou a Arma")
     grid_search[1].fit(X_train[1], y_train[1])
-    # print("Ajustou o Lugar")
+    print("Ajustou o Lugar")
     grid_search[2].fit(X_train[2], y_train[2]) 
-    # print("Ajustou o Suspeito\n")
+    print("Ajustou o Suspeito\n")
 
     # Coleta as melhores combinações de parâmetros para cada tipo de carta
     melhores_parametros = mostrar_parametros(grid_search)
@@ -336,32 +335,18 @@ def treinar_100_vezes():
                 param_cont[j][5] += 1
             
         if i%intervalo_analise == 0:
-            string = [
-                f"\nNo intervalo de {marco if marco != 0 else 1} até {i} ocorreram:\n",
-                f"Para Arma:\n",
-                f"Activation identity: {param_cont[0][0]}\n",
-                f"Activation logistic: {param_cont[0][1]}\n",
-                f"Solver adam: {param_cont[0][2]}\n",
-                f"Solver lbfgs: {param_cont[0][3]}\n",
-                f"Learning_rate constant: {param_cont[0][4]}\n",
-                f"Learning_rate adaptive: {param_cont[0][5]}\n",
-                
-                f"Para Lugar:\n",
-                f"Activation identity: {param_cont[1][0]}\n",
-                f"Activation logistic: {param_cont[1][1]}\n",
-                f"Solver adam: {param_cont[1][2]}\n",
-                f"Solver lbfgs: {param_cont[1][3]}\n",
-                f"Learning_rate constant: {param_cont[1][4]}\n",
-                f"Learning_rate adaptive: {param_cont[1][5]}\n",
-                
-                f"Para Suspeito:\n",
-                f"Activation identity: {param_cont[2][0]}\n",
-                f"Activation logistic: {param_cont[2][1]}\n",
-                f"Solver adam: {param_cont[2][2]}\n",
-                f"Solver lbfgs: {param_cont[2][3]}\n",
-                f"Learning_rate constant: {param_cont[2][4]}\n",
-                f"Learning_rate adaptive: {param_cont[2][5]}\n",
-            ]
+            string = f"\nNo intervalo de {marco if marco != 0 else 1} até {i} ocorreram:\n"
+            for j in range(3):
+                string_aux = [
+                    f"\nPara Arma:\n",
+                    f"Activation identity: {param_cont[j][0]}\n",
+                    f"Activation logistic: {param_cont[j][1]}\n",
+                    f"Solver adam: {param_cont[j][2]}\n",
+                    f"Solver lbfgs: {param_cont[j][3]}\n",
+                    f"Learning_rate constant: {param_cont[j][4]}\n",
+                    f"Learning_rate adaptive: {param_cont[j][5]}\n"    
+                ]
+                string += ''.join(string_aux)
             print("".join(string))
             for i in range(len(param_cont)):
                 param_cont[i] = [0] * len(param_cont[i])  
@@ -369,7 +354,7 @@ def treinar_100_vezes():
 
 
 def main(): 
-    treinar_100_vezes()
+    treinar_uma_vez()
 
 if __name__ == "__main__":
     main()
